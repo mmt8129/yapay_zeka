@@ -62,93 +62,108 @@
 
     <div id="clear-modal" class="modal-overlay"><div class="modal-box"><h2>Silinsin mi?</h2><div style="display:flex;gap:10px;"><button class="btn btn-yes" onclick="clearChat()">EVET</button><button class="btn btn-no" onclick="toggleModal('clear-modal')">HAYIR</button></div></div></div>
 
-    <script>
-        const chatScreen = document.getElementById('chat-screen');
-        const userInput = document.getElementById('user-input');
-        const sendBtn = document.getElementById('send-btn');
-        const thinking = document.getElementById('thinking');
-        const API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
-        const FIXED_KEY = 'kk-jz68Cnm-Q3X3VoJtZOLk-4yIdxwcJKssKHPTIDQDncw';
+<script>
+    const chatScreen = document.getElementById('chat-screen');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const thinking = document.getElementById('thinking');
+    const API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
+    const FIXED_KEY = 'kk-jz68Cnm-Q3X3VoJtZOLk-4yIdxwcJKssKHPTIDQDncw';
 
-        window.onload = () => {
-            document.getElementById('api-key-input').value = FIXED_KEY;
-            document.getElementById('system-prompt').value = localStorage.getItem('khoj_system_prompt') || '';
-            sendBtn.classList.add('online');
-        };
+    window.onload = () => {
+        document.getElementById('api-key-input').value = FIXED_KEY;
+        document.getElementById('system-prompt').value = localStorage.getItem('khoj_system_prompt') || '';
+        sendBtn.classList.add('online');
+        loadChatHistory();
+    };
 
-        function toggleModal(id) { document.getElementById(id).style.display = document.getElementById(id).style.display === 'flex' ? 'none' : 'flex'; }
-        function saveSettings() { localStorage.setItem('khoj_system_prompt', document.getElementById('system-prompt').value); toggleModal('settings-modal'); }
-        function clearChat() { chatScreen.innerHTML = ''; toggleModal('clear-modal'); }
+    function toggleModal(id) { document.getElementById(id).style.display = document.getElementById(id).style.display === 'flex' ? 'none' : 'flex'; }
+    function saveSettings() { localStorage.setItem('khoj_system_prompt', document.getElementById('system-prompt').value); toggleModal('settings-modal'); }
+    
+    function clearChat() { 
+        chatScreen.innerHTML = ''; 
+        localStorage.removeItem('chat_history');
+        toggleModal('clear-modal'); 
+    }
 
-        function cleanResponse(text) {
-            return text
-                .replace(/\*\*/g, '') // Kalın yazıları temizle
-                .replace(/\*/g, '\n🔹 ') // Yıldızları mermiye çevir ve alt satıra at
-                .replace(/\[.*?\]\(.*?\)/g, '') // Markdown linkleri temizle
-                .replace(/\(.*?\)/g, (match) => match.includes('http') ? '' : match) // Parantez içi linkleri temizle
-                .trim();
-        }
+    function cleanResponse(text) {
+        return text
+            .replace(/\*\*/g, '')
+            .replace(/\*/g, '\n🔹 ')
+            .replace(/\[.*?\]\(.*?\)/g, '')
+            .replace(/\(.*?\)/g, (match) => match.includes('http') ? '' : match)
+            .trim();
+    }
 
-        async function handleFile(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    addMessage("", 'user-message', e.target.result);
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
+    function saveChatHistory() {
+        localStorage.setItem('chat_history', chatScreen.innerHTML);
+    }
 
-        sendBtn.onclick = async () => {
-            const text = userInput.value.trim();
-            if(!text) return;
-            addMessage(text, 'user-message');
-            userInput.value = '';
-            userInput.style.height = '45px';
-            thinking.style.display = 'block';
-            await fetchAPI(text);
-        };
-
-        async function fetchAPI(query) {
-            try {
-                // Yerel depolamadan sistem promptunu al
-                const systemPrompt = localStorage.getItem('khoj_system_prompt') || '';
-                
-                // Sorguyu sistem promptu ile birle�tirerek g�nder
-                // Not: Khoj API yap�s�na g�re q parametresi i�ine eklenmi�tir
-                const fullQuery = systemPrompt ? `${systemPrompt}\n\nKullan�c� Sorusu: ${query}` : query;
-
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${FIXED_KEY}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ q: fullQuery, stream: false, n: 1, client: "web" })
-                });
-                const data = await response.json();
-                thinking.style.display = 'none';
-                if(data.response) addMessage(cleanResponse(data.response), 'khoj-message');
-            } catch (e) {
-                thinking.style.display = 'none';
-                addMessage("Hata olu�tu AB�!", 'khoj-message');
-            }
-        }
-
-        function addMessage(text, type, imgData = null) {
-            const d = document.createElement('div');
-            d.className = 'message ' + type;
-            if(imgData) {
-                const img = document.createElement('img');
-                img.src = imgData;
-                img.className = 'msg-img';
-                d.appendChild(img);
-            }
-            const span = document.createElement('span');
-            span.innerText = text;
-            d.appendChild(span);
-            chatScreen.appendChild(d);
+    function loadChatHistory() {
+        const history = localStorage.getItem('chat_history');
+        if (history) {
+            chatScreen.innerHTML = history;
             chatScreen.scrollTop = chatScreen.scrollHeight;
         }
+    }
 
-        userInput.oninput = function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; };
-    </script>
+    async function handleFile(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                addMessage("", 'user-message', e.target.result);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    sendBtn.onclick = async () => {
+        const text = userInput.value.trim();
+        if(!text) return;
+        addMessage(text, 'user-message');
+        userInput.value = '';
+        userInput.style.height = '45px';
+        thinking.style.display = 'block';
+        await fetchAPI(text);
+    };
+
+    async function fetchAPI(query) {
+        try {
+            const systemPrompt = localStorage.getItem('khoj_system_prompt') || '';
+            const fullQuery = systemPrompt ? `${systemPrompt}\n\nKullanıcı Sorusu: ${query}` : query;
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${FIXED_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ q: fullQuery, stream: false, n: 1, client: "web" })
+            });
+            const data = await response.json();
+            thinking.style.display = 'none';
+            if(data.response) addMessage(cleanResponse(data.response), 'khoj-message');
+        } catch (e) {
+            thinking.style.display = 'none';
+            addMessage("Hata oluştu ABİ!", 'khoj-message');
+        }
+    }
+
+    function addMessage(text, type, imgData = null) {
+        const d = document.createElement('div');
+        d.className = 'message ' + type;
+        if(imgData) {
+            const img = document.createElement('img');
+            img.src = imgData;
+            img.className = 'msg-img';
+            d.appendChild(img);
+        }
+        const span = document.createElement('span');
+        span.innerText = text;
+        d.appendChild(span);
+        chatScreen.appendChild(d);
+        chatScreen.scrollTop = chatScreen.scrollHeight;
+        saveChatHistory();
+    }
+
+    userInput.oninput = function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; };
+</script>
 </body>
 </html>
