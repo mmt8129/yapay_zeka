@@ -171,32 +171,37 @@ text-shadow: 0 0 2px #00FF00;
                 function addMessage(text, type) {
     const d = document.createElement('div');
     d.className = 'message ' + type;
+
+    // Sadeleştirme İşlemleri
+    // 1. Parantez içindeki linkleri temizler
+    let cleanText = text.replace(/\((https?:\/\/[^\s]+)\)/g, '');
     
-    // JSON içindeki promptu bulup resme çevirmeye çalışır
-    if (text.includes('action_input')) {
-        try {
-            const start = text.indexOf('{');
-            const end = text.lastIndexOf('}') + 1;
-            const jsonPart = text.substring(start, end);
-            const actionData = JSON.parse(jsonPart);
-            const prompt = actionData.action_input;
-            const cleanText = text.replace(jsonPart, '');
-            
-            // Burası Khoj'un ürettiği görseli çekmeye çalışır (Not: API'nin resim URL'si döndürmesi gerekir)
-            d.innerHTML = cleanText + `<br><p>🖼️ <i>Görsel Oluşturma Komutu Algılandı:</i></p><p style="font-size:10px; opacity:0.7;">${prompt}</p>`;
-        } catch (e) {
-            d.innerText = text;
-        }
-    } else {
-        d.innerText = text;
+    // 2. Metin içinde kalan çıplak linkleri temizler
+    cleanText = cleanText.replace(/https?:\/\/[^\s]+/g, '');
+
+    // 3. Kalın yazı (**...**) işaretlerini siler
+    cleanText = cleanText.replace(/\*\*/g, '');
+
+    // 4. [1], [2] gibi kaynak referanslarını temizler
+    cleanText = cleanText.replace(/\[\d+\]/g, '');
+
+    // 5. JSON formatındaki resim üretim komutlarını metinden atar
+    if (cleanText.includes('{') && cleanText.includes('action')) {
+        cleanText = cleanText.split('{')[0];
     }
+
+    // Temizlenmiş metni kutucuğa basar
+    d.innerText = cleanText.trim();
 
     chatScreen.appendChild(d);
     chatScreen.scrollTop = chatScreen.scrollHeight;
+
+    // Hafızaya orjinal metni değil, temizlenmiş metni kaydeder
     let history = JSON.parse(localStorage.getItem('khoj_history') || '[]');
-    history.push({ text, type });
+    history.push({ text: cleanText.trim(), type });
     localStorage.setItem('khoj_history', JSON.stringify(history));
 }
+
     </script>
 </body>
 </html>
