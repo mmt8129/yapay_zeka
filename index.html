@@ -88,7 +88,7 @@ text-shadow: 0 0 2px #00FF00;
         const API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
 
                 window.onload = () => {
-            const savedKey = localStorage.getItem('khoj_api_key') || 'kk-_r6UaBOhTTY7SP-x8YgSAjUuMmwLEvkFoofV97oW-HI';
+            const savedKey = localStorage.getItem('khoj_api_key') || 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
             document.getElementById('api-key-input').value = savedKey;
             document.getElementById('system-prompt').value = localStorage.getItem('khoj_system_prompt') || '';
             if(savedKey) sendBtn.classList.add('online');
