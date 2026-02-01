@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <link rel="manifest" href="data:application/manifest+json,{'name':'Khoj DOS','short_name':'Khoj','start_url':'.','display':'standalone','background_color':'#000000','theme_color':'#000000'}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
     <title>KHOJ MS-DOS</title>
     <style>
         body, html { 
@@ -31,6 +32,8 @@
         .user-message::before { content: "A:\\> "; color: #66FF66; }
         .khoj-message::before { content: "C:\\> "; color: gold; }
         
+        .cors-error { color: #ff0000; cursor: pointer; text-decoration: underline; animation: blink 1s infinite; }
+        
         .input-wrapper { 
             position: fixed; bottom: 0; width: 100%; 
             background: #000; padding: 10px; 
@@ -52,6 +55,7 @@
         }
         
         #thinking { color: #ffffff; padding-left: 20px; display: none; font-weight: bold; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -65,12 +69,14 @@
     </div>
 
     <script>
-        // PWA Kaydı
+        // Service Worker Kaydı (PWA için zorunlu)
         if ('serviceWorker' in navigator) {
-            const swCode = "self.addEventListener('fetch', function(event) {});";
-            const blob = new Blob([swCode], {type: 'text/javascript'});
-            const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl);
+            window.addEventListener('load', () => {
+                const swCode = "self.addEventListener('fetch', (e) => {});";
+                const blob = new Blob([swCode], {type: 'text/javascript'});
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(() => {});
+            });
         }
 
         const chatScreen = document.getElementById('chat-screen');
@@ -79,6 +85,14 @@
         const thinking = document.getElementById('thinking');
         const API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
         const apiKey = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
+
+        window.onload = () => {
+            const savedChat = localStorage.getItem('khoj_chat_history');
+            if (savedChat) {
+                chatScreen.innerHTML = savedChat;
+                chatScreen.scrollTop = chatScreen.scrollHeight;
+            }
+        };
 
         userInput.addEventListener('input', function() {
             this.style.height = 'auto';
@@ -91,6 +105,7 @@
 
             if (text.toLowerCase() === 'cls') {
                 chatScreen.innerHTML = '';
+                localStorage.removeItem('khoj_chat_history');
                 userInput.value = '';
                 userInput.style.height = 'auto';
                 userInput.blur();
@@ -114,21 +129,34 @@
                     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" })
                 });
+                
+                if (response.status === 403) throw new Error('CORS');
+
                 const data = await response.json();
                 thinking.style.display = 'none';
                 addMessage(data.response || "Hata: Yanıt alınamadı.", 'khoj-message');
             } catch (e) {
                 thinking.style.display = 'none';
-                addMessage("Bağlantı hatası!", 'khoj-message');
+                const errorMsg = e.message === 'CORS' 
+                    ? "SİSTEM KİLİTLİ: BURAYA TIKLA VE CORS ONAYI VER!" 
+                    : "Bağlantı hatası!";
+                addMessage(errorMsg, 'khoj-message error-msg', e.message === 'CORS');
             }
         }
 
-        function addMessage(text, type) {
+        function addMessage(text, type, isCors = false) {
             const d = document.createElement('div');
             d.className = 'message ' + type;
-            d.innerText = text;
+            
+            if (isCors) {
+                d.innerHTML = `<span class="cors-error" onclick="window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank')">${text}</span>`;
+            } else {
+                d.innerText = text;
+            }
+            
             chatScreen.appendChild(d);
             chatScreen.scrollTop = chatScreen.scrollHeight;
+            localStorage.setItem('khoj_chat_history', chatScreen.innerHTML);
         }
     </script>
 </body>
