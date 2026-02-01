@@ -3,205 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Khoj Smart Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="data:application/manifest+json,{'name':'Khoj DOS','short_name':'Khoj','start_url':'.','display':'standalone','background_color':'#000000','theme_color':'#000000'}">
+    <title>KHOJ MS-DOS</title>
     <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-            --user-bubble: rgba(255, 255, 255, 0.35);
-            --khoj-bubble: rgba(200, 255, 200, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.5);
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { 
-    margin: 0; 
-    padding: 0; 
-    height: 100%; 
-    font-family: 'Courier New', sans-serif; 
-    background: #000000; /* Burayı #000000 yaparak tam siyah sağlarsın */
-    overflow: hidden; 
-}
-        .header { position: fixed; top: 0; width: 100%; height: 60px; display: flex; justify-content: flex-end; align-items: center; padding: 0 20px; z-index: 100; }
-        .icon-btn { font-size: 15px; cursor: pointer; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); margin-left: 15px; }
-        #chat-screen { height: calc(100% - 130px); overflow-y: auto; padding: 70px 15px 20px; display: flex; flex-direction: column; scroll-behavior: smooth; }
-        .message { margin-bottom: 15px; padding: 14px 18px; border-radius: 25px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); max-width: 100%; line-height: 1.5; font-weight: 700;color: white; word-wrap: break-word;font-size: 12px; font-family: 'Montserrat', sans-serif; }
-        .user-message { align-self: flex-end; background: var(--user-bubble); font-family: 'Montserrat', sans-serif; border-bottom-right-radius: 4px; text-align: right; } color: white;
-        .khoj-message { align-self: center; background: var(--khoj-bubble); width: 100%; border-bottom-left-radius: 4px; text-align: left ; color: white;font-weight: 1900;
-text-shadow: 0 0 2px #00FF00;
-      }
-        .input-wrapper { position: fixed; bottom: 0; width: 100%; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(20px); border-top: 4px solid rgba(255, 255, 255, 0.6); padding: 10px 15px env(safe-area-inset-bottom); }
-        .input-container { display: flex; align-items: flex-end; gap: 10px; }
-        #user-input { flex: 1; background: rgba(255, 255, 255, 1.1); border: none; border-radius: 18px; padding: 12px; color: black; font-size: 16px; font-weight: 700; outline: none; resize: none; min-height: 45px; max-height: 150px; }
-        .send-btn { font-size: 35px; color: #ff4b2b; transition: 0.3s ease; cursor: pointer; }
-        .send-btn.online { color: #00ff88; filter: drop-shadow(0 0 10px #00ff88); }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(5px); }
-        .modal-box { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 40px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        .btn { width: 100%; padding: 18px; border-radius: 25px; border: none; font-size: 18px; font-weight: bold; color: white; margin-top: 10px; cursor: pointer; }
-        .btn-yes { background: #2ecc71; } .btn-no { background: #e74c3c; } .btn-blue { background: #3498db; }
-        #thinking { padding: 5px 20px; font-size: 14px; font-style: italic; color: white; font-weight: bold; display: none; text-align: center; }
-        img { max-width: 100%; border-radius: 15px; margin-top: 10px; }
-    @keyframes blink { 
-    0% { opacity: 1; } 
-    50% { opacity: 0.3; } 
-    100% { opacity: 1; } 
-}
-
-#thinking { 
-    animation: blink 1s infinite; 
-}
+            margin: 0; padding: 0; height: 100%; 
+            background: #000000; color: #ffffff; 
+            font-family: 'Lucida Console', 'Monaco', 'Consolas', monospace; 
+            font-weight: bold; 
+            image-rendering: pixelated;
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: grayscale;
+            overflow: hidden; 
+        }
+        #chat-screen { 
+            height: calc(100% - 60px); overflow-y: auto; 
+            padding: 20px; display: flex; flex-direction: column; 
+            box-sizing: border-box;
+        }
+        .message { 
+            width: 100%; margin-bottom: 25px; 
+            line-height: 1.4; font-size: 16px; 
+            white-space: pre-wrap; font-weight: bold; color: #ffffff;
+            word-wrap: break-word; overflow-wrap: break-word;
+        }
+        .user-message::before { content: "A:\\> "; color: #66FF66; }
+        .khoj-message::before { content: "C:\\> "; color: gold; }
+        
+        .input-wrapper { 
+            position: fixed; bottom: 0; width: 100%; 
+            background: #000; padding: 10px; 
+        }
+        .input-container { display: flex; align-items: flex-start; position: relative; }
+        .prompt-prefix { 
+            color: #ffffff; margin-right: 0px; font-weight: bold; 
+            width: 63px; flex-shrink: 0; cursor: pointer; user-select: none;
+        }
+        
+        #user-input { 
+            flex: 1; background: transparent; border: none; 
+            color: #ffffff; font-family: 'Lucida Console', monospace; 
+            font-size: 16px; font-weight: bold; outline: none; 
+            padding: 0; margin: 0;
+            caret-color: #ffffff;
+            word-wrap: break-word; white-space: pre-wrap;
+            resize: none; height: auto; min-height: 20px;
+        }
+        
+        #thinking { color: #ffffff; padding-left: 20px; display: none; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <span class="icon-btn" onclick="toggleModal('clear-modal')">🗑️</span>
-        <span class="icon-btn" onclick="toggleModal('settings-modal')">⚙️</span>
-    </div>
     <div id="chat-screen"></div>
-    <div id="thinking">Düşünüyor...</div>
+    <div id="thinking">Sistem işliyor...</div>
     <div class="input-wrapper">
-        <div class="input-container">
-            <textarea id="user-input" rows="1" placeholder="..."></textarea>
-            <div id="send-btn" class="send-btn">➤</div>
+        <div class="input-container" id="input-box">
+            <span class="prompt-prefix" id="send-trigger">Abi:\></span>
+            <textarea id="user-input" rows="1" autofocus autocomplete="off"></textarea>
         </div>
     </div>
-
-    <div id="settings-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3>AYARLAR</h3>
-            <input type="text" id="api-key-input" placeholder="API Key..." style="width:100%; padding:12px; border-radius:15px; margin-bottom:10px;">
-            <textarea id="system-prompt" placeholder="Gizli Talimatlar (Khoj karakteri)..." style="width:100%; height:80px; padding:12px; border-radius:15px; margin-bottom:10px; resize:none;"></textarea>
-            <button class="btn btn-yes" onclick="saveSettings()">KAYDET ✅</button>
-            <button class="btn btn-blue" onclick="startNewTopic()">YENİ KONU 🆕</button>
-            <button class="btn btn-no" onclick="toggleModal('settings-modal')">KAPAT</button>
-        </div>
-    </div>
-
-    <div id="topic-success-modal" class="modal-overlay"><div class="modal-box"><h3>BİLGİ</h3><p>Talimatlarınızla yeni konu başlatıldı!</p><button class="btn btn-yes" onclick="toggleModal('topic-success-modal')">TAMAM 👍</button></div></div>
-    <div id="clear-modal" class="modal-overlay"><div class="modal-box"><h2>Sohbet Silinsin mi?</h2><div style="display:flex;gap:10px;"><button class="btn btn-yes" onclick="clearChat()">EVET 👍</button><button class="btn btn-no" onclick="toggleModal('clear-modal')">HAYIR 👎</button></div></div></div>
-    <div id="upload-modal" class="modal-overlay"><div class="modal-box"><h3>Dosya Yükle</h3><button class="btn btn-yes">📁 DOSYA SEÇ</button><button class="btn btn-no" onclick="toggleModal('upload-modal')">İPTAL</button></div></div>
 
     <script>
+        // PWA Kaydı
+        if ('serviceWorker' in navigator) {
+            const swCode = "self.addEventListener('fetch', function(event) {});";
+            const blob = new Blob([swCode], {type: 'text/javascript'});
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl);
+        }
+
         const chatScreen = document.getElementById('chat-screen');
         const userInput = document.getElementById('user-input');
-        const sendBtn = document.getElementById('send-btn');
+        const sendTrigger = document.getElementById('send-trigger');
         const thinking = document.getElementById('thinking');
         const API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
+        const apiKey = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
 
-                window.onload = () => {
-            const savedKey = localStorage.getItem('khoj_api_key') || 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
-            document.getElementById('api-key-input').value = savedKey;
-            document.getElementById('system-prompt').value = localStorage.getItem('khoj_system_prompt') || '';
-            if(savedKey) sendBtn.classList.add('online');
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
 
-            // Kayıtlı mesajları ekrana basar
-            const history = JSON.parse(localStorage.getItem('khoj_history') || '[]');
-            history.forEach(msg => {
-                const d = document.createElement('div');
-                d.className = 'message ' + msg.type;
-                if(msg.text.includes('http') && (msg.text.match(/\.(jpg|jpeg|png|gif|webp)/i))) {
-                    const url = msg.text.match(/\bhttps?:\/\/\S+/gi)[0];
-                    d.innerHTML = msg.text.replace(url, '') + `<br><img src="${url}">`;
-                } else { d.innerText = msg.text; }
-                chatScreen.appendChild(d);
-            });
-            chatScreen.scrollTop = chatScreen.scrollHeight;
-        };
-
-
-        function toggleModal(id) { document.getElementById(id).style.display = document.getElementById(id).style.display === 'flex' ? 'none' : 'flex'; }
-        
-        function saveSettings() {
-            localStorage.setItem('khoj_api_key', document.getElementById('api-key-input').value);
-            localStorage.setItem('khoj_system_prompt', document.getElementById('system-prompt').value);
-            sendBtn.classList.add('online');
-            toggleModal('settings-modal');
-        }
-
-               function clearChat() { 
-            chatScreen.innerHTML = ''; 
-            localStorage.removeItem('khoj_history'); 
-            toggleModal('clear-modal'); 
-        }
-
-
-        async function startNewTopic() {
-            chatScreen.innerHTML = '';
-            const systemPrompt = document.getElementById('system-prompt').value;
-            toggleModal('settings-modal');
-            if(systemPrompt) {
-                thinking.style.display = 'block';
-                await fetchAPI(systemPrompt); // Arka planda talimatı gönder
-                thinking.style.display = 'none';
-            }
-            toggleModal('topic-success-modal');
-        }
-
-        sendBtn.onclick = async () => {
+        async function processMessage() {
             const text = userInput.value.trim();
             if(!text) return;
+
+            if (text.toLowerCase() === 'cls') {
+                chatScreen.innerHTML = '';
+                userInput.value = '';
+                userInput.style.height = 'auto';
+                userInput.blur();
+                return;
+            }
+
             addMessage(text, 'user-message');
             userInput.value = '';
-            userInput.style.height = '45px';
+            userInput.style.height = 'auto';
+            userInput.blur();
             thinking.style.display = 'block';
             await fetchAPI(text);
-        };
+        }
+
+        sendTrigger.addEventListener('click', processMessage);
 
         async function fetchAPI(query) {
-            const apiKey = document.getElementById('api-key-input').value;
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
+                    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" })
                 });
                 const data = await response.json();
                 thinking.style.display = 'none';
-                if(data.response) addMessage(data.response, 'khoj-message');
-                else addMessage("ABİ cevap boş geldi, API ayarlarını kontrol et.", 'khoj-message');
+                addMessage(data.response || "Hata: Yanıt alınamadı.", 'khoj-message');
             } catch (e) {
                 thinking.style.display = 'none';
-                addMessage("Bağlantı hatası ABİ! CORS veya API URL sorunu olabilir.", 'khoj-message');
+                addMessage("Bağlantı hatası!", 'khoj-message');
             }
         }
 
-                function addMessage(text, type) {
-    const d = document.createElement('div');
-    d.className = 'message ' + type;
-
-    // Sadeleştirme İşlemleri
-    // 1. Parantez içindeki linkleri temizler
-    let cleanText = text.replace(/\((https?:\/\/[^\s]+)\)/g, '');
-    
-    // 2. Metin içinde kalan çıplak linkleri temizler
-    cleanText = cleanText.replace(/https?:\/\/[^\s]+/g, '');
-
-    // 3. Kalın yazı (**...**) işaretlerini siler
-    cleanText = cleanText.replace(/\*\*/g, '');
-
-    // 4. [1], [2] gibi kaynak referanslarını temizler
-    cleanText = cleanText.replace(/\[\d+\]/g, '');
-
-    // 5. JSON formatındaki resim üretim komutlarını metinden atar
-    if (cleanText.includes('{') && cleanText.includes('action')) {
-        cleanText = cleanText.split('{')[0];
-    }
-
-    // Temizlenmiş metni kutucuğa basar
-    d.innerText = cleanText.trim();
-
-    chatScreen.appendChild(d);
-    chatScreen.scrollTop = chatScreen.scrollHeight;
-
-    // Hafızaya orjinal metni değil, temizlenmiş metni kaydeder
-    let history = JSON.parse(localStorage.getItem('khoj_history') || '[]');
-    history.push({ text: cleanText.trim(), type });
-    localStorage.setItem('khoj_history', JSON.stringify(history));
-}
-
+        function addMessage(text, type) {
+            const d = document.createElement('div');
+            d.className = 'message ' + type;
+            d.innerText = text;
+            chatScreen.appendChild(d);
+            chatScreen.scrollTop = chatScreen.scrollHeight;
+        }
     </script>
 </body>
 </html>
