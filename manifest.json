@@ -1,0 +1,18 @@
+{
+  "name": "KHOJ MS-DOS AI",
+  "short_name": "Khoj AI",
+  "description": "MS-DOS Temalı Yapay Zeka Arayüzü",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/61/61120.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
