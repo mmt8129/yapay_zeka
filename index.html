@@ -26,11 +26,14 @@
         .message { 
             width: 100%; margin-bottom: 25px; 
             line-height: 1.4; font-size: 16px; 
-            white-space: pre-wrap; font-weight: bold; color: #ffffff;
+            white-space: pre-wrap; font-weight: bold;
             word-wrap: break-word; overflow-wrap: break-word;
         }
-        .user-message::before { content: "A:\\> "; color: #66FF66; }
-        .khoj-message::before { content: "C:\\> "; color: gold; }
+        
+        /* Renkleri sınıflara taşıdık */
+        .user-text { color: #66FF66; }
+        .khoj-text { color: gold; }
+        .white-text { color: #ffffff; }
         
         .cors-error { color: #ff0000; cursor: pointer; text-decoration: underline; animation: blink 1s infinite; }
         
@@ -69,7 +72,6 @@
     </div>
 
     <script>
-        // Service Worker Kaydı (PWA için zorunlu)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = "self.addEventListener('fetch', (e) => {});";
@@ -134,24 +136,59 @@
 
                 const data = await response.json();
                 thinking.style.display = 'none';
-                addMessage(data.response || "Hata: Yanıt alınamadı.", 'khoj-message');
+                typeWriter(data.response || "Hata: Yanıt alınamadı.");
             } catch (e) {
                 thinking.style.display = 'none';
                 const errorMsg = e.message === 'CORS' 
                     ? "SİSTEM KİLİTLİ: BURAYA TIKLA VE CORS ONAYI VER!" 
                     : "Bağlantı hatası!";
-                addMessage(errorMsg, 'khoj-message error-msg', e.message === 'CORS');
+                addMessage(errorMsg, 'error-msg', e.message === 'CORS');
             }
+        }
+
+        function typeWriter(text) {
+            const d = document.createElement('div');
+            d.className = 'message';
+            
+            // C:\> kısmını en başta bir kez renkli ekle
+            const prefix = document.createElement('span');
+            prefix.className = 'khoj-text';
+            prefix.innerText = "C:\\> ";
+            d.appendChild(prefix);
+
+            // Metin içeriği için ayrı bir span
+            const content = document.createElement('span');
+            content.className = 'white-text';
+            d.appendChild(content);
+            
+            chatScreen.appendChild(d);
+            
+            let i = 0;
+            const speed = 15;
+
+            function type() {
+                if (i < text.length) {
+                    content.textContent += text.charAt(i);
+                    i++;
+                    chatScreen.scrollTop = chatScreen.scrollHeight;
+                    setTimeout(type, speed);
+                } else {
+                    localStorage.setItem('khoj_chat_history', chatScreen.innerHTML);
+                }
+            }
+            type();
         }
 
         function addMessage(text, type, isCors = false) {
             const d = document.createElement('div');
-            d.className = 'message ' + type;
+            d.className = 'message';
             
-            if (isCors) {
-                d.innerHTML = `<span class="cors-error" onclick="window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank')">${text}</span>`;
+            if (type === 'user-message') {
+                d.innerHTML = `<span class="user-text">A:\\> </span><span class="white-text">${text}</span>`;
+            } else if (isCors) {
+                d.innerHTML = `<span class="khoj-text">C:\\> </span><span class="cors-error" onclick="window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank')">${text}</span>`;
             } else {
-                d.innerText = text;
+                d.innerHTML = `<span class="khoj-text">C:\\> </span><span class="white-text">${text}</span>`;
             }
             
             chatScreen.appendChild(d);
