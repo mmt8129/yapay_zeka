@@ -29,51 +29,28 @@
             white-space: pre-wrap; font-weight: bold;
             word-wrap: break-word; overflow-wrap: break-word;
         }
-        
         .user-text { color: #66FF66; }
         .khoj-text { color: gold; }
         .white-text { color: #ffffff; }
-        
-        /* Yanıp sönme efekti */
-        .waiting { animation: blink-fast 0.8s infinite; }
-        
+        .waiting-blink { animation: blink-fast 0.8s infinite; }
         .cors-error { color: #ff0000; cursor: pointer; text-decoration: underline; animation: blink-fast 1s infinite; }
-        
-        .input-wrapper { 
-            position: fixed; bottom: 0; width: 100%; 
-            background: #000; padding: 10px; 
-        }
+        .input-wrapper { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; }
         .input-container { display: flex; align-items: flex-start; position: relative; }
-        .prompt-prefix { 
-            color: #ffffff; margin-right: 0px; font-weight: bold; 
-            width: 63px; flex-shrink: 0; cursor: pointer; user-select: none;
-        }
-        
-        #user-input { 
-            flex: 1; background: transparent; border: none; 
-            color: #ffffff; font-family: 'Lucida Console', monospace; 
-            font-size: 16px; font-weight: bold; outline: none; 
-            padding: 0; margin: 0;
-            caret-color: #ffffff;
-            word-wrap: break-word; white-space: pre-wrap;
-            resize: none; height: auto; min-height: 20px;
-        }
-        
+        .prompt-prefix { color: #ffffff; margin-right: 0px; font-weight: bold; width: 63px; flex-shrink: 0; cursor: pointer; user-select: none; }
+        #user-input { flex: 1; background: transparent; border: none; color: #ffffff; font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: bold; outline: none; padding: 0; margin: 0; caret-color: #ffffff; word-wrap: break-word; white-space: pre-wrap; resize: none; height: auto; min-height: 20px; }
         #thinking { color: #ffffff; padding-left: 20px; display: none; font-weight: bold; }
-        
         @keyframes blink-fast { 0% { opacity: 1; } 50% { opacity: 0.1; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
     <div id="chat-screen"></div>
-    <div id="thinking" class="waiting">Sistem işliyor...</div>
+    <div id="thinking" class="waiting-blink">Sistem işliyor...</div>
     <div class="input-wrapper">
         <div class="input-container" id="input-box">
             <span class="prompt-prefix" id="send-trigger">Abi:\></span>
             <textarea id="user-input" rows="1" autofocus autocomplete="off"></textarea>
         </div>
     </div>
-
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -83,19 +60,17 @@
                 navigator.serviceWorker.register(swUrl).catch(() => {});
             });
         }
-
         const chatScreen = document.getElementById('chat-screen');
         const userInput = document.getElementById('user-input');
         const sendTrigger = document.getElementById('send-trigger');
         const thinking = document.getElementById('thinking');
         const API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
         const apiKey = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
-
+        
         window.onload = () => {
             const savedChat = localStorage.getItem('khoj_chat_history');
             if (savedChat) {
                 chatScreen.innerHTML = savedChat;
-                chatScreen.scrollTop = chatScreen.scrollHeight;
             }
         };
 
@@ -107,7 +82,6 @@
         async function processMessage() {
             const text = userInput.value.trim();
             if(!text) return;
-
             if (text.toLowerCase() === 'cls') {
                 chatScreen.innerHTML = '';
                 localStorage.removeItem('khoj_chat_history');
@@ -116,49 +90,35 @@
                 userInput.blur();
                 return;
             }
-
-            const userMsgId = addMessage(text, 'user-message');
-            const userMsgElement = document.getElementById(userMsgId);
-            userMsgElement.classList.add('waiting'); // Senin mesajın yanıp sönsün
-
+            // Mesajı en üste ekle
+            addMessage(text, 'user-message', false, true);
             userInput.value = '';
             userInput.style.height = 'auto';
             userInput.blur();
             thinking.style.display = 'block';
-            
-            await fetchAPI(text, userMsgId);
+            await fetchAPI(text);
         }
 
         sendTrigger.addEventListener('click', processMessage);
 
-        async function fetchAPI(query, userMsgId) {
+        async function fetchAPI(query) {
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" })
                 });
-                
                 if (response.status === 403) throw new Error('CORS');
-
                 const data = await response.json();
-                
-                // Kaynakları temizle [1], [link] vb.
                 let cleanResponse = (data.response || "Hata: Yanıt alınamadı.")
-                    .replace(/\[\d+\]/g, '') // [1] gibi sayıları siler
-                    .replace(/\[https?:\/\/[^\]]+\]/g, '') // [http...] gibi linkleri siler
+                    .replace(/\[\d+\]/g, '')
+                    .replace(/\[https?:\/\/[^\]]+\]/g, '')
                     .trim();
-
                 thinking.style.display = 'none';
-                document.getElementById(userMsgId).classList.remove('waiting'); // Yanıp sönmeyi durdur
-                
                 typeWriter(cleanResponse);
             } catch (e) {
                 thinking.style.display = 'none';
-                document.getElementById(userMsgId).classList.remove('waiting');
-                const errorMsg = e.message === 'CORS' 
-                    ? "SİSTEM KİLİTLİ: BURAYA TIKLA VE CORS ONAYI VER!" 
-                    : "Bağlantı hatası!";
+                const errorMsg = e.message === 'CORS' ? "SİSTEM KİLİTLİ: BURAYA TIKLA VE CORS ONAYI VER!" : "Bağlantı hatası!";
                 addMessage(errorMsg, 'error-msg', e.message === 'CORS');
             }
         }
@@ -173,16 +133,20 @@
             const content = document.createElement('span');
             content.className = 'white-text';
             d.appendChild(content);
-            chatScreen.appendChild(d);
+            
+            // Cevabı kullanıcı mesajının hemen altına (başa yakın) ekle
+            if (chatScreen.firstChild && chatScreen.firstChild.nextSibling) {
+                chatScreen.insertBefore(d, chatScreen.firstChild.nextSibling);
+            } else {
+                chatScreen.appendChild(d);
+            }
             
             let i = 0;
-            const speed = 7;
-
+            const speed = 8;
             function type() {
                 if (i < text.length) {
                     content.textContent += text.charAt(i);
                     i++;
-                    chatScreen.scrollTop = chatScreen.scrollHeight;
                     setTimeout(type, speed);
                 } else {
                     localStorage.setItem('khoj_chat_history', chatScreen.innerHTML);
@@ -191,12 +155,9 @@
             type();
         }
 
-        function addMessage(text, type, isCors = false) {
+        function addMessage(text, type, isCors = false, toTop = false) {
             const d = document.createElement('div');
-            const id = 'msg-' + Date.now();
-            d.id = id;
             d.className = 'message';
-            
             if (type === 'user-message') {
                 d.innerHTML = `<span class="user-text">A:\\> </span><span class="white-text">${text}</span>`;
             } else if (isCors) {
@@ -205,10 +166,13 @@
                 d.innerHTML = `<span class="khoj-text">C:\\> </span><span class="white-text">${text}</span>`;
             }
             
-            chatScreen.appendChild(d);
-            chatScreen.scrollTop = chatScreen.scrollHeight;
+            if (toTop) {
+                chatScreen.prepend(d);
+            } else {
+                chatScreen.appendChild(d);
+            }
+            
             localStorage.setItem('khoj_chat_history', chatScreen.innerHTML);
-            return id;
         }
     </script>
 </body>
