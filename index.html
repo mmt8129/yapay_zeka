@@ -30,12 +30,14 @@
             word-wrap: break-word; overflow-wrap: break-word;
         }
         
-        /* Renkleri sınıflara taşıdık */
         .user-text { color: #66FF66; }
         .khoj-text { color: gold; }
         .white-text { color: #ffffff; }
         
-        .cors-error { color: #ff0000; cursor: pointer; text-decoration: underline; animation: blink 1s infinite; }
+        /* Yanıp sönme efekti */
+        .waiting { animation: blink-fast 0.8s infinite; }
+        
+        .cors-error { color: #ff0000; cursor: pointer; text-decoration: underline; animation: blink-fast 1s infinite; }
         
         .input-wrapper { 
             position: fixed; bottom: 0; width: 100%; 
@@ -58,12 +60,13 @@
         }
         
         #thinking { color: #ffffff; padding-left: 20px; display: none; font-weight: bold; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        
+        @keyframes blink-fast { 0% { opacity: 1; } 50% { opacity: 0.1; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
     <div id="chat-screen"></div>
-    <div id="thinking">Sistem işliyor...</div>
+    <div id="thinking" class="waiting">Sistem işliyor...</div>
     <div class="input-wrapper">
         <div class="input-container" id="input-box">
             <span class="prompt-prefix" id="send-trigger">Abi:\></span>
@@ -114,17 +117,21 @@
                 return;
             }
 
-            addMessage(text, 'user-message');
+            const userMsgId = addMessage(text, 'user-message');
+            const userMsgElement = document.getElementById(userMsgId);
+            userMsgElement.classList.add('waiting'); // Senin mesajın yanıp sönsün
+
             userInput.value = '';
             userInput.style.height = 'auto';
             userInput.blur();
             thinking.style.display = 'block';
-            await fetchAPI(text);
+            
+            await fetchAPI(text, userMsgId);
         }
 
         sendTrigger.addEventListener('click', processMessage);
 
-        async function fetchAPI(query) {
+        async function fetchAPI(query, userMsgId) {
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -135,10 +142,20 @@
                 if (response.status === 403) throw new Error('CORS');
 
                 const data = await response.json();
+                
+                // Kaynakları temizle [1], [link] vb.
+                let cleanResponse = (data.response || "Hata: Yanıt alınamadı.")
+                    .replace(/\[\d+\]/g, '') // [1] gibi sayıları siler
+                    .replace(/\[https?:\/\/[^\]]+\]/g, '') // [http...] gibi linkleri siler
+                    .trim();
+
                 thinking.style.display = 'none';
-                typeWriter(data.response || "Hata: Yanıt alınamadı.");
+                document.getElementById(userMsgId).classList.remove('waiting'); // Yanıp sönmeyi durdur
+                
+                typeWriter(cleanResponse);
             } catch (e) {
                 thinking.style.display = 'none';
+                document.getElementById(userMsgId).classList.remove('waiting');
                 const errorMsg = e.message === 'CORS' 
                     ? "SİSTEM KİLİTLİ: BURAYA TIKLA VE CORS ONAYI VER!" 
                     : "Bağlantı hatası!";
@@ -149,18 +166,13 @@
         function typeWriter(text) {
             const d = document.createElement('div');
             d.className = 'message';
-            
-            // C:\> kısmını en başta bir kez renkli ekle
             const prefix = document.createElement('span');
             prefix.className = 'khoj-text';
             prefix.innerText = "C:\\> ";
             d.appendChild(prefix);
-
-            // Metin içeriği için ayrı bir span
             const content = document.createElement('span');
             content.className = 'white-text';
             d.appendChild(content);
-            
             chatScreen.appendChild(d);
             
             let i = 0;
@@ -181,6 +193,8 @@
 
         function addMessage(text, type, isCors = false) {
             const d = document.createElement('div');
+            const id = 'msg-' + Date.now();
+            d.id = id;
             d.className = 'message';
             
             if (type === 'user-message') {
@@ -194,6 +208,7 @@
             chatScreen.appendChild(d);
             chatScreen.scrollTop = chatScreen.scrollHeight;
             localStorage.setItem('khoj_chat_history', chatScreen.innerHTML);
+            return id;
         }
     </script>
 </body>
