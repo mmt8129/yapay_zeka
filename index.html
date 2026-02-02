@@ -32,6 +32,7 @@
         .user-text { color: #66FF66; }
         .khoj-text { color: gold; }
         .white-text { color: #ffffff; }
+        /* Sadece sistem işliyor yazısı için yanıp sönme */
         .waiting-blink { animation: blink-fast 0.8s infinite; }
         .cors-error { color: #ff0000; cursor: pointer; text-decoration: underline; animation: blink-fast 1s infinite; }
         .input-wrapper { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; }
@@ -66,19 +67,17 @@
         const thinking = document.getElementById('thinking');
         const API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
         const apiKey = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
-        
         window.onload = () => {
             const savedChat = localStorage.getItem('khoj_chat_history');
             if (savedChat) {
                 chatScreen.innerHTML = savedChat;
+                chatScreen.scrollTop = chatScreen.scrollHeight;
             }
         };
-
         userInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
         });
-
         async function processMessage() {
             const text = userInput.value.trim();
             if(!text) return;
@@ -90,17 +89,14 @@
                 userInput.blur();
                 return;
             }
-            // Mesajı en üste ekle
-            addMessage(text, 'user-message', false, true);
+            addMessage(text, 'user-message');
             userInput.value = '';
             userInput.style.height = 'auto';
             userInput.blur();
             thinking.style.display = 'block';
             await fetchAPI(text);
         }
-
         sendTrigger.addEventListener('click', processMessage);
-
         async function fetchAPI(query) {
             try {
                 const response = await fetch(API_URL, {
@@ -122,7 +118,6 @@
                 addMessage(errorMsg, 'error-msg', e.message === 'CORS');
             }
         }
-
         function typeWriter(text) {
             const d = document.createElement('div');
             d.className = 'message';
@@ -133,20 +128,14 @@
             const content = document.createElement('span');
             content.className = 'white-text';
             d.appendChild(content);
-            
-            // Cevabı kullanıcı mesajının hemen altına (başa yakın) ekle
-            if (chatScreen.firstChild && chatScreen.firstChild.nextSibling) {
-                chatScreen.insertBefore(d, chatScreen.firstChild.nextSibling);
-            } else {
-                chatScreen.appendChild(d);
-            }
-            
+            chatScreen.appendChild(d);
             let i = 0;
-            const speed = 8;
+            const speed = 15; // Burayı değiştirerek hızı ayarlayabilirsin ABİ
             function type() {
                 if (i < text.length) {
                     content.textContent += text.charAt(i);
                     i++;
+                    chatScreen.scrollTop = chatScreen.scrollHeight;
                     setTimeout(type, speed);
                 } else {
                     localStorage.setItem('khoj_chat_history', chatScreen.innerHTML);
@@ -154,8 +143,7 @@
             }
             type();
         }
-
-        function addMessage(text, type, isCors = false, toTop = false) {
+        function addMessage(text, type, isCors = false) {
             const d = document.createElement('div');
             d.className = 'message';
             if (type === 'user-message') {
@@ -165,13 +153,8 @@
             } else {
                 d.innerHTML = `<span class="khoj-text">C:\\> </span><span class="white-text">${text}</span>`;
             }
-            
-            if (toTop) {
-                chatScreen.prepend(d);
-            } else {
-                chatScreen.appendChild(d);
-            }
-            
+            chatScreen.appendChild(d);
+            chatScreen.scrollTop = chatScreen.scrollHeight;
             localStorage.setItem('khoj_chat_history', chatScreen.innerHTML);
         }
     </script>
