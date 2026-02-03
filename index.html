@@ -182,7 +182,7 @@
                 thinking.style.display = 'none';
                 if(data.response && !isHidden) {
                     // Linkleri ve parantezli kaynakları temizle
-                    let cleanRes = data.response.replace(/\[.*?\]|\(https?:\/\/.*?\)/g, '').trim();
+                    let cleanRes = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim();
                     addMessage(cleanRes, 'khoj-message', true);
                 }
             } catch (e) {
