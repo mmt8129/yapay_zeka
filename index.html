@@ -122,7 +122,13 @@
             const history = JSON.parse(localStorage.getItem('khoj_history') || '[]');
             history.forEach(msg => addMessage(msg.text, msg.type, false));
         };
-
+window.visualViewport.addEventListener('resize', () => {
+    let viewHeight = window.visualViewport.height;
+    document.body.style.height = viewHeight + 'px';
+    window.scrollTo(0, 0);
+    chatScreen.scrollTop = chatScreen.scrollHeight;
+});
+        
         function toggleModal(id) { document.getElementById(id).style.display = document.getElementById(id).style.display === 'flex' ? 'none' : 'flex'; }
 
         function loadSettings() {
