@@ -7,16 +7,16 @@
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait",
-      "src": "https://via.placeholder.com/192x192/000000/FFFFFF?text=Khoj",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/fluency/192/000000/artificial-intelligence.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "https://via.placeholder.com/512x512/000000/FFFFFF?text=Khoj",
+      "src": "https://img.icons8.com/fluency/512/000000/artificial-intelligence.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     }
   ]
 }
