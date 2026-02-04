@@ -129,10 +129,10 @@
         let pressTimer;
 
         window.onload = () => {
+            applyConfig();
             if (!activeChatId || !chats[activeChatId]) {
                 createNewChat();
             } else {
-                applyConfig();
                 renderChatList();
                 loadActiveChat();
             }
@@ -174,9 +174,6 @@
                 
                 item.ontouchstart = () => { pressTimer = setTimeout(() => { if(navigator.vibrate) navigator.vibrate(50); activeChatId = id; document.getElementById('action-modal').style.display='flex'; }, 800); };
                 item.ontouchend = () => clearTimeout(pressTimer);
-                item.onmousedown = () => { pressTimer = setTimeout(() => { activeChatId = id; document.getElementById('action-modal').style.display='flex'; }, 800); };
-                item.onmouseup = () => clearTimeout(pressTimer);
-
                 list.appendChild(item);
             });
         }
@@ -187,6 +184,8 @@
             if(!text) return;
 
             displayMessage(text, 'user-message', false);
+            
+            if (!chats[activeChatId]) createNewChat();
             chats[activeChatId].messages.push({text: text, type:'user-message'});
             
             if(chats[activeChatId].title === "Yeni Sohbet") {
@@ -215,10 +214,11 @@
                     let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim();
                     displayMessage(clean, 'khoj-message', true);
                     chats[activeChatId].messages.push({text: clean, type:'khoj-message'});
+                    saveAll();
                 }
             } catch(e) { 
                 document.getElementById('thinking').style.display = 'none';
-                displayMessage("Hata: CORS izni almanız gerekebilir!", 'khoj-message', false);
+                displayMessage("Hata: Bağlantı sorunu!", 'khoj-message', false);
             }
         }
 
@@ -278,13 +278,12 @@
             localStorage.setItem('khoj_config', JSON.stringify(config));
         }
 
-        function deleteSingleChat() { if(confirm("Bu sohbet kalıcı olarak silinsin mi?")) { delete chats[activeChatId]; activeChatId = Object.keys(chats)[0] || null; if(!activeChatId) createNewChat(); saveAll(); loadActiveChat(); closeModals(); } }
+        function deleteSingleChat() { if(confirm("Silinsin mi?")) { delete chats[activeChatId]; activeChatId = Object.keys(chats)[0] || null; if(!activeChatId) createNewChat(); saveAll(); loadActiveChat(); closeModals(); } }
         function renameChat() { const t = prompt("Yeni isim:", chats[activeChatId].title); if(t) { chats[activeChatId].title = t; saveAll(); renderChatList(); closeModals(); } }
-        function confirmClearAll() { if(confirm("Tüm sohbet geçmişi silinecek! Onaylıyor musunuz?")) { localStorage.clear(); location.reload(); } }
-        function confirmExit() { if(confirm("Uygulamadan çıkılsın mı?")) alert("Uygulamayı kapatmak için sekmenizi sonlandırın."); }
+        function confirmClearAll() { if(confirm("Tüm geçmiş silinecek!")) { localStorage.clear(); location.reload(); } }
+        function confirmExit() { if(confirm("Çıkış yapılsın mı?")) alert("Sekmeyi kapatın."); }
 
         document.getElementById('user-input').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
     </script>
 </body>
-    </html>
-    
+</html>
