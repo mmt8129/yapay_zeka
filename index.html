@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Khoj Smart Pro</title>
-    <link rel="manifest" href="manifest.json">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #000000;
@@ -14,187 +13,191 @@
             --khoj-border: #ff4b2b;
             --accent: #ff4b2b;
             --font-size: 14px;
+            --panel-bg: rgba(0, 0, 0, 0.3);
+            --input-bg: #ffffff;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-color); overflow: hidden; transition: background 0.3s; }
-        
-        /* HEADER */
-        .header { position: fixed; top: 0; width: 100%; height: 60px; display: flex; align-items: center; padding: 0 15px; z-index: 100; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .menu-btn { font-size: 30px; cursor: pointer; color: var(--accent); }
 
-        /* SIDEBAR */
+        [data-theme="white"] {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --panel-bg: rgba(255, 255, 255, 0.3);
+            --input-bg: #f0f0f0;
+            --khoj-border: #ff4b2b;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-color); overflow: hidden; transition: background 0.3s, color 0.3s; }
+        
+        .menu-btn { position: fixed; top: 15px; left: 15px; font-size: 32px; cursor: pointer; color: var(--accent); z-index: 200; }
+        .clock-panel { position: fixed; top: 3px; left: 50%; transform: translateX(-50%); background: var(--panel-bg); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--accent); z-index: 150; color: var(--accent); font-weight: 900; font-size: 16px; letter-spacing: 1px; }
+
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 300; backdrop-filter: blur(5px); }
-        .sidebar { position: fixed; left: -60%; top: 0; width: 60%; height: 100%; background: rgba(10, 10, 10, 0.98); z-index: 301; transition: 0.4s ease; padding: 25px 15px; display: flex; flex-direction: column; border-right: 2px solid var(--accent); }
+        .sidebar { position: fixed; left: -75%; top: 0; width: 75%; height: 100%; background: var(--bg-color); z-index: 301; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px 15px; border-right: 2px solid var(--accent); }
         .sidebar.active { left: 0; }
         
-        .sidebar-section { border: 1.5px solid var(--accent); border-radius: 15px; padding: 12px; margin-bottom: 15px; cursor: pointer; text-align: center; font-weight: bold; color: var(--accent); font-size: 14px; }
-        
-        /* SOHBET LİSTESİ - TURUNCU VE KALIN */
-        .chat-list-container { flex: 1; overflow-y: auto; margin-top: 5px; border: 1.5px solid var(--accent); border-radius: 15px; padding: 10px; background: rgba(0,0,0,0.2); }
-        .chat-item { padding: 12px; border-radius: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.05); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; position: relative; color: var(--accent); font-weight: 700; text-transform: uppercase; }
+        .sidebar-section { border: 2px solid var(--accent); border-radius: 15px; padding: 12px; margin-bottom: 15px; cursor: pointer; text-align: center; font-weight: 900; color: var(--accent); font-size: 14px; text-transform: uppercase; }
+        .chat-list-container { height: calc(100% - 150px); overflow-y: auto; margin-top: 5px; border: 1.5px solid var(--accent); border-radius: 15px; padding: 10px; background: rgba(128,128,128,0.1); }
+        .chat-item { padding: 12px; border-radius: 10px; margin-bottom: 8px; background: rgba(128,128,128,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; color: var(--accent); font-weight: 900; text-transform: uppercase; }
         .chat-item.active { border-color: var(--accent); background: rgba(255, 75, 43, 0.2); }
 
-        /* MESAJLAR */
-        #chat-screen { height: 100%; overflow-y: auto; padding: 80px 15px 150px; display: flex; flex-direction: column; scroll-behavior: smooth; }
-        .message { margin-bottom: 20px; padding: 15px 18px; border-radius: 20px; max-width: 85%; line-height: 1.6; font-size: var(--font-size); word-wrap: break-word; white-space: pre-wrap; }
-        .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; }
-        .khoj-message { align-self: flex-start; background: transparent; border: 1.5px solid var(--khoj-border); color: var(--text-color); border-bottom-left-radius: 4px; }
+        #chat-screen { height: 100%; overflow-y: auto; padding: 80px 15px 160px; display: flex; flex-direction: column; }
+        .message { margin-bottom: 20px; padding: 15px 18px; border-radius: 20px; max-width: 95%; line-height: 1.6; font-size: var(--font-size); word-wrap: break-word; white-space: pre-wrap; }
+        .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; margin-left: 15%; }
+        .khoj-message { align-self: flex-start; background: transparent; border: 2px solid var(--khoj-border); color: var(--text-color); border-bottom-left-radius: 4px; margin-left: 3%; margin-right: 3%; }
 
-        /* INPUT */
-        .input-wrapper { position: fixed; bottom: 0; width: 100%; background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(20px); padding: 15px 15px calc(15px + env(safe-area-inset-bottom)); z-index: 100; border-top: 1px solid rgba(255,255,255,0.1); }
-        .input-container { display: flex; align-items: flex-end; gap: 10px; }
-        #user-input { flex: 1; background: #fff; border: none; border-radius: 20px; padding: 12px 18px; color: #000; font-size: 16px; min-height: 45px; max-height: 150px; resize: none; }
-        .send-btn { font-size: 35px; color: var(--accent); cursor: pointer; line-height: 1; }
+        .input-wrapper { position: fixed; bottom: 0; width: 100%; background: var(--bg-color); border-top: 1px solid rgba(128,128,128,0.2); padding: 15px 15px calc(15px + env(safe-area-inset-bottom)); z-index: 100; }
+        .input-container { display: flex; align-items: flex-end; gap: 10px; max-width: 800px; margin: 0 auto; }
+        #user-input { flex: 1; background: var(--input-bg); border: 1px solid #ccc; border-radius: 20px; padding: 12px 18px; color: #000; font-size: 16px; min-height: 48px; max-height: 150px; resize: none; }
+        .send-btn { font-size: 40px; color: var(--accent); cursor: pointer; }
 
-        /* THINKING */
-        #thinking { display: none; text-align: center; color: var(--accent); font-size: 12px; padding: 10px; margin: 0 20px 15px; border: 1.5px solid var(--accent); border-radius: 15px; font-weight: bold; }
+        #thinking { display: none; text-align: center; color: var(--accent); font-size: 13px; padding: 12px; margin: 0 20px 15px; border: 2px solid var(--accent); border-radius: 15px; font-weight: 900; background: rgba(255, 75, 43, 0.1); }
 
-        /* MODALLAR */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 400; backdrop-filter: blur(10px); }
-        .modal-box { background: #111; width: 90%; max-width: 360px; padding: 25px; border-radius: 25px; border: 1.5px solid var(--accent); color: #fff; }
-        .btn { width: 100%; padding: 14px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 400; backdrop-filter: blur(10px); }
+        .modal-box { background: var(--bg-color); width: 92%; max-width: 380px; padding: 25px; border-radius: 25px; border: 2px solid var(--accent); color: var(--text-color); max-height: 85vh; overflow-y: auto; }
+        
+        .modern-controls { display: flex; background: rgba(128,128,128,0.1); border-radius: 15px; border: 1px solid #444; overflow: hidden; margin-top: 5px; }
+        .btn-ctrl { flex: 1; padding: 15px; border: none; background: transparent; color: var(--text-color); font-size: 20px; font-weight: 900; cursor: pointer; }
+        .ctrl-val { flex: 2; display: flex; align-items: center; justify-content: center; background: rgba(128,128,128,0.1); font-size: 14px; font-weight: 900; border-left: 1px solid #444; border-right: 1px solid #444; }
+
+        .btn { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: 900; cursor: pointer; margin-top: 10px; font-size: 14px; text-transform: uppercase; }
         .btn-orange { background: var(--accent); color: white; }
-        .btn-gray { background: #333; color: #ccc; }
         .btn-danger { background: #c0392b; color: white; }
+        .btn-gray { background: #666; color: white; }
+        
+        select, textarea { width: 100%; padding: 12px; border-radius: 12px; background: rgba(128,128,128,0.1); border: 1px solid #444; color: var(--text-color); font-family: inherit; margin-top: 5px; }
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
-    <div class="header">
-        <span class="menu-btn" onclick="openSidebar()">⋮</span>
-        <span style="margin-left: 15px; font-weight: 700; letter-spacing: 1px; color: var(--accent);">KHOJ PRO</span>
-    </div>
+    <div class="menu-btn" onclick="openSidebar()">⋮</div>
+    <div class="clock-panel" id="live-clock">00:00</div>
 
     <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
     <div id="sidebar" class="sidebar">
         <div class="sidebar-section" onclick="openSettings()">AYARLAR ⚙️</div>
         <div class="sidebar-section" onclick="createNewChat()">YENİ SOHBET ＋</div>
-        <div style="font-size: 11px; color: #666; margin: 5px 5px 10px; font-weight: bold;">GEÇMİŞ SOHBETLER</div>
         <div id="chat-list" class="chat-list-container"></div>
     </div>
 
     <div id="chat-screen"></div>
-    <div id="thinking">Khoj yazıyor... ⚡</div>
+    <div id="thinking">KHOJ YAZIYOR... ⚡</div>
 
     <div class="input-wrapper">
         <div class="input-container">
-            <textarea id="user-input" rows="1" placeholder="Mesaj yaz..."></textarea>
+            <textarea id="user-input" rows="1" placeholder="Buraya yaz abi..."></textarea>
             <div class="send-btn" onclick="handleSend()">➤</div>
         </div>
     </div>
 
     <div id="settings-modal" class="modal-overlay">
         <div class="modal-box">
-            <h3 style="margin-top:0; color: var(--accent);">AYARLAR</h3>
-            <div style="margin-bottom:15px;">
-                <label>Sistem Talimatı</label>
-                <textarea id="system-prompt" rows="2" style="width:100%; background:#222; color:white; border:none; border-radius:10px; padding:10px; margin-top:5px;"></textarea>
+            <h3 style="margin-top:0; color:var(--accent); text-align:center; font-weight: 900;">AYARLAR</h3>
+            <div class="setting-item">
+                <label style="font-size:11px; font-weight:900">SİSTEM TALİMATI</label>
+                <textarea id="system-prompt" rows="2"></textarea>
             </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                <button class="btn-gray" style="padding:10px; border-radius:10px;" onclick="adjustConfig('font', -1)">A-</button>
-                <span id="font-val" style="align-self:center;">14</span>
-                <button class="btn-gray" style="padding:10px; border-radius:10px;" onclick="adjustConfig('font', 1)">A+</button>
+            <div class="setting-item">
+                <label style="font-size:11px; font-weight:900">TEMA SEÇİMİ</label>
+                <select id="theme-select" onchange="updateTheme(this.value)">
+                    <option value="dark">KARANLIK (SİYAH)</option>
+                    <option value="white">AYDINLIK (BEYAZ)</option>
+                </select>
             </div>
-            <button class="btn btn-danger" onclick="confirmClearAll()">TÜM SOHBETLERİ SİL 🗑️</button>
+            <div class="setting-item">
+                <label style="font-size:11px; font-weight:900">YAZI BOYUTU</label>
+                <div class="modern-controls">
+                    <button class="btn-ctrl" onclick="adjustConfig('font', -1)">-</button>
+                    <div class="ctrl-val"><span id="font-val">14</span>PX</div>
+                    <button class="btn-ctrl" onclick="adjustConfig('font', 1)">+</button>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label style="font-size:11px; font-weight:900">YAZIM HIZI</label>
+                <div class="modern-controls">
+                    <button class="btn-ctrl" onclick="adjustConfig('speed', -5)">-</button>
+                    <div class="ctrl-val"><span id="speed-val">20</span>MS</div>
+                    <button class="btn-ctrl" onclick="adjustConfig('speed', 5)">+</button>
+                </div>
+            </div>
+            <button class="btn btn-orange" onclick="window.open('https://cors-anywhere.herokuapp.com/corsdemo')">CORS İZNİ AL 🔑</button>
+            <button class="btn btn-danger" onclick="confirmClearAll()">SİSTEMİ SIFIRLA</button>
             <button class="btn btn-gray" onclick="closeModals()">KAPAT</button>
         </div>
     </div>
 
-    <div id="action-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h4 style="color:var(--accent)">Sohbet Seçenekleri</h4>
-            <button class="btn btn-orange" onclick="renameChat()">Yeniden Adlandır ✏️</button>
-            <button class="btn btn-danger" onclick="deleteSingleChat()">Sohbeti Sil 🗑️</button>
-            <button class="btn btn-gray" onclick="closeModals()">Vazgeç</button>
-        </div>
-    </div>
-
     <script>
-        const API_URL = 'https://corsproxy.io/?https://app.khoj.dev/api/chat';
+        const API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
         const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
 
         let chats = JSON.parse(localStorage.getItem('khoj_chats')) || {};
         let activeChatId = localStorage.getItem('khoj_active_id');
-        let config = JSON.parse(localStorage.getItem('khoj_config')) || { speed: 20, font: 14, systemPrompt: '' };
-        let pressTimer;
+        let config = JSON.parse(localStorage.getItem('khoj_config')) || { speed: 20, font: 14, theme: 'dark', systemPrompt: '' };
+        let isUserScrolling = false;
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        }
+        setInterval(updateClock, 1000); updateClock();
 
         window.onload = () => {
-            if (!activeChatId || !chats[activeChatId]) {
-                createNewChat();
-            } else {
-                applyConfig();
-                renderChatList();
-                loadActiveChat();
-            }
+            applyConfig();
+            if (!activeChatId || !chats[activeChatId]) createNewChat();
+            else { renderChatList(); loadActiveChat(); }
         };
+
+        const screen = document.getElementById('chat-screen');
+        
+        // KİLİTLENME ÇÖZÜMÜ: Kullanıcı kaydırdığında takibi bırak
+        screen.addEventListener('touchstart', () => { isUserScrolling = true; });
+        screen.addEventListener('scroll', () => {
+            if (screen.scrollTop + screen.clientHeight < screen.scrollHeight - 50) {
+                isUserScrolling = true;
+            } else {
+                isUserScrolling = false;
+            }
+        });
 
         function openSidebar() { document.getElementById('sidebar-overlay').style.display = 'block'; document.getElementById('sidebar').classList.add('active'); }
         function closeSidebar() { document.getElementById('sidebar-overlay').style.display = 'none'; document.getElementById('sidebar').classList.remove('active'); }
         function openSettings() { closeSidebar(); document.getElementById('settings-modal').style.display = 'flex'; }
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); saveAll(); }
 
         function createNewChat() {
             const id = 'chat_' + Date.now();
-            chats[id] = { title: "YENİ SOHBET", messages: [] };
+            chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false };
             activeChatId = id;
-            saveAll();
-            renderChatList();
-            loadActiveChat();
-            closeSidebar();
+            saveAll(); renderChatList(); loadActiveChat(); closeSidebar();
         }
 
         function loadActiveChat() {
-            const screen = document.getElementById('chat-screen');
             screen.innerHTML = '';
-            if (chats[activeChatId]) {
-                chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false));
-            }
+            if (chats[activeChatId]) chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false));
             screen.scrollTop = screen.scrollHeight;
             renderChatList();
         }
 
-        function renderChatList() {
-            const list = document.getElementById('chat-list');
-            list.innerHTML = '';
-            Object.keys(chats).sort((a,b) => b.split('_')[1] - a.split('_')[1]).forEach(id => {
-                const item = document.createElement('div');
-                item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
-                item.innerText = chats[id].title;
-
-                // Tıklama
-                item.onclick = () => { activeChatId = id; saveAll(); loadActiveChat(); closeSidebar(); };
-                
-                // Uzun Basma Algılayıcı (Mobil & Masaüstü)
-                const startPress = () => { pressTimer = setTimeout(() => { if(navigator.vibrate) navigator.vibrate(50); activeChatId = id; document.getElementById('action-modal').style.display='flex'; }, 800); };
-                const endPress = () => clearTimeout(pressTimer);
-                
-                item.onmousedown = startPress; item.onmouseup = endPress;
-                item.ontouchstart = startPress; item.ontouchend = endPress;
-
-                list.appendChild(item);
-            });
-        }
-
         async function handleSend() {
             const input = document.getElementById('user-input');
-            const text = input.value.trim();
+            let text = input.value.trim();
             if(!text) return;
+            isUserScrolling = false; // Yeni mesajda otomatik aşağı kaydır
 
-            displayMessage(text, 'user-message', false);
-            if (!chats[activeChatId]) createNewChat();
-            chats[activeChatId].messages.push({text: text, type:'user-message'});
-            
-            if(chats[activeChatId].title === "YENİ SOHBET") {
-                chats[activeChatId].title = text.substring(0,20).toUpperCase();
+            let finalMsg = text;
+            if(config.systemPrompt && !chats[activeChatId].sysSent) {
+                finalMsg = config.systemPrompt + "\n\n" + text;
+                chats[activeChatId].sysSent = true;
             }
 
-            input.value = '';
-            input.style.height = '45px';
+            displayMessage(text, 'user-message', false);
+            chats[activeChatId].messages.push({text: text, type:'user-message'});
+            if(chats[activeChatId].title === "YENİ SOHBET") chats[activeChatId].title = text.substring(0,25).toUpperCase();
+
+            input.value = ''; input.style.height = '48px';
             document.getElementById('thinking').style.display = 'block';
             
-            await fetchAI(text);
-            saveAll();
-            renderChatList();
+            await fetchAI(finalMsg);
+            saveAll(); renderChatList();
         }
 
         async function fetchAI(query) {
@@ -210,16 +213,14 @@
                     let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim();
                     displayMessage(clean, 'khoj-message', true);
                     chats[activeChatId].messages.push({text: clean, type:'khoj-message'});
-                    saveAll();
                 }
             } catch(e) { 
                 document.getElementById('thinking').style.display = 'none';
-                displayMessage("Hata: Bağlantı kurulamadı!", 'khoj-message', false);
+                displayMessage("BAĞLANTI HATASI!", 'khoj-message', false);
             }
         }
 
         function displayMessage(text, type, animate) {
-            const screen = document.getElementById('chat-screen');
             const d = document.createElement('div');
             d.className = `message ${type}`;
             screen.appendChild(d);
@@ -228,40 +229,51 @@
                 function typeWriter() { 
                     if(i < text.length) { 
                         d.textContent += text.charAt(i++); 
-                        screen.scrollTop = screen.scrollHeight; 
+                        if(!isUserScrolling) screen.scrollTop = screen.scrollHeight;
                         setTimeout(typeWriter, config.speed); 
                     } 
                 }
                 typeWriter();
-            } else { 
-                d.textContent = text; 
-                screen.scrollTop = screen.scrollHeight; 
-            }
+            } else { d.textContent = text; screen.scrollTop = screen.scrollHeight; }
+        }
+
+        function renderChatList() {
+            const list = document.getElementById('chat-list');
+            list.innerHTML = '';
+            Object.keys(chats).sort((a,b) => b.split('_')[1] - a.split('_')[1]).forEach(id => {
+                const item = document.createElement('div');
+                item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
+                item.innerText = chats[id].title;
+                item.onclick = () => { activeChatId = id; saveAll(); loadActiveChat(); closeSidebar(); };
+                list.appendChild(item);
+            });
         }
 
         function adjustConfig(type, val) {
+            if(type === 'speed') config.speed = Math.max(0, config.speed + val);
             if(type === 'font') config.font = Math.max(10, config.font + val);
             applyConfig();
-            saveAll();
         }
+
+        function updateTheme(val) { config.theme = val; applyConfig(); }
 
         function applyConfig() {
             document.getElementById('font-val').innerText = config.font;
+            document.getElementById('speed-val').innerText = config.speed;
             document.getElementById('system-prompt').value = config.systemPrompt || '';
             document.documentElement.style.setProperty('--font-size', config.font + 'px');
+            document.body.setAttribute('data-theme', config.theme);
+            document.getElementById('theme-select').value = config.theme;
         }
 
         function saveAll() {
+            config.systemPrompt = document.getElementById('system-prompt').value;
             localStorage.setItem('khoj_chats', JSON.stringify(chats));
             localStorage.setItem('khoj_active_id', activeChatId);
-            config.systemPrompt = document.getElementById('system-prompt').value;
             localStorage.setItem('khoj_config', JSON.stringify(config));
         }
 
-        function deleteSingleChat() { if(confirm("Bu sohbet silinsin mi?")) { delete chats[activeChatId]; activeChatId = Object.keys(chats)[0] || null; if(!activeChatId) createNewChat(); saveAll(); loadActiveChat(); closeModals(); } }
-        function renameChat() { const t = prompt("Yeni isim:", chats[activeChatId].title); if(t) { chats[activeChatId].title = t.toUpperCase(); saveAll(); renderChatList(); closeModals(); } }
-        function confirmClearAll() { if(confirm("Tüm geçmiş silinecek!")) { localStorage.clear(); location.reload(); } }
-
+        function confirmClearAll() { if(confirm("HER ŞEY SİLİNSİN Mİ?")) { localStorage.clear(); location.reload(); } }
         document.getElementById('user-input').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
     </script>
 </body>
