@@ -112,7 +112,7 @@
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
         const thinking = document.getElementById('thinking');
-        const API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
+        const API_URL = 'https://corsproxy.io/?' + 'https://app.khoj.dev/api/chat';
         const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
 
         let settings = JSON.parse(localStorage.getItem('khoj_settings')) || { speed: 20, font: 14, theme: 'dark' };
