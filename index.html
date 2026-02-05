@@ -7,7 +7,7 @@
     
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -52,7 +52,7 @@
         .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; margin-left: 5%; }
         .khoj-message { align-self: flex-start; background: transparent; border: 2px solid var(--khoj-border); color: var(--text-color); border-bottom-left-radius: 4px; margin-right: 5%; margin-left: 10%; }
 
-.input-wrapper { position: fixed; bottom: 0; width: 100%; background: var(--bg-color); border-top: 1px solid rgba(128,128,128,0.2); padding: 15px 15px calc(15px + env(safe-area-inset-bottom)); z-index: 100; }
+        .input-wrapper { position: fixed; bottom: 0; width: 100%; background: var(--bg-color); border-top: 1px solid rgba(128,128,128,0.2); padding: 15px 15px calc(15px + env(safe-area-inset-bottom)); z-index: 100; }
         .input-container { display: flex; align-items: flex-end; gap: 10px; max-width: 800px; margin: 0 auto; }
         #user-input { flex: 1; background: var(--input-bg); border: 1px solid #ccc; border-radius: 20px; padding: 12px 18px; color: #000; font-size: 16px; min-height: 48px; max-height: 150px; resize: none; }
         .send-btn { font-size: 40px; color: var(--accent); cursor: pointer; }
@@ -104,8 +104,7 @@
     <div id="chat-screen"></div>
 
     <div id="thinking" class="typing-dots">
-
-<div class="dot" style="animation-delay: 0.0s"></div>
+        <div class="dot" style="animation-delay: 0.0s"></div>
         <div class="dot" style="animation-delay: 0.5s"></div>
         <div class="dot" style="animation-delay: 1.0s"></div>
         <div class="dot" style="animation-delay: 1.5s"></div>
@@ -188,7 +187,7 @@
             else isUserScrolling = false;
         });
 
-function openSidebar() { document.getElementById('sidebar-overlay').style.display = 'block'; document.getElementById('sidebar').classList.add('active'); }
+        function openSidebar() { document.getElementById('sidebar-overlay').style.display = 'block'; document.getElementById('sidebar').classList.add('active'); }
         function closeSidebar() { document.getElementById('sidebar-overlay').style.display = 'none'; document.getElementById('sidebar').classList.remove('active'); }
         function openSettings() { closeSidebar(); document.getElementById('settings-modal').style.display = 'flex'; }
         
@@ -254,7 +253,7 @@ function openSidebar() { document.getElementById('sidebar-overlay').style.displa
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Authorization': Bearer ${API_KEY}, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" })
                 });
                 const data = await response.json();
@@ -274,9 +273,8 @@ function openSidebar() { document.getElementById('sidebar-overlay').style.displa
         }
 
         function displayMessage(text, type, animate) {
-
-const d = document.createElement('div');
-            d.className = message ${type};
+            const d = document.createElement('div');
+            d.className = `message ${type}`;
             screen.appendChild(d);
             if(animate) {
                 let i = 0; 
@@ -305,7 +303,7 @@ const d = document.createElement('div');
 
             sortedIds.forEach(id => {
                 const item = document.createElement('div');
-                item.className = chat-item ${id === activeChatId ? 'active' : ''};
+                item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 item.innerText = chats[id].title;
                 item.onmousedown = item.ontouchstart = (e) => {
                     pressTimer = setTimeout(() => {
@@ -363,7 +361,7 @@ const d = document.createElement('div');
             if(ts) ts.value = config.theme;
         }
 
-function saveAll() {
+        function saveAll() {
             const sp = document.getElementById('system-prompt');
             if(sp) config.systemPrompt = sp.value;
             localStorage.setItem('khoj_chats', JSON.stringify(chats));
@@ -377,3 +375,5 @@ function saveAll() {
     </script>
 </body>
 </html>
+
+bu benim chatbotum, bikaç soru ve düzenlemeler yapmak istiyorum yardım et
