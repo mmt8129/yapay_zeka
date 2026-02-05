@@ -56,7 +56,6 @@
         #user-input { flex: 1; background: var(--input-bg); border: 1px solid #ccc; border-radius: 20px; padding: 12px 18px; color: #000; font-size: 16px; min-height: 48px; max-height: 150px; resize: none; }
         .send-btn { font-size: 40px; color: var(--accent); cursor: pointer; }
 
-        /* YENİ NOKTA ANİMASYONU STİLLERİ */
         .typing-dots { display: none; gap: 8px; padding: 15px 18px; margin-left: 10%; margin-bottom: 20px; align-self: flex-start; }
         .dot { width: 12px; height: 12px; background-color: var(--accent); border-radius: 50%; opacity: 0; animation: dotFlow 3s infinite; }
         @keyframes dotFlow { 0%, 100% { opacity: 0; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
@@ -134,13 +133,6 @@
                 </select>
             </div>
             <div class="setting-item">
-                <label style="font-size:11px; font-weight:900">BAĞLANTI KÖPRÜSÜ (PROXY)</label>
-                <select id="proxy-select" onchange="updateProxy(this.value)">
-                    <option value="heroku">HEROKUAPP (İzin Gerekir)</option>
-                    <option value="io">CORSPROXY.IO (Hızlı/Doğrudan)</option>
-                </select>
-            </div>
-            <div class="setting-item">
                 <label style="font-size:11px; font-weight:900">YAZI BOYUTU</label>
                 <div class="modern-controls">
                     <button class="btn-ctrl" onclick="adjustConfig('font', -1)">-</button>
@@ -149,14 +141,13 @@
                 </div>
             </div>
             <div class="setting-item">
-                <label style="font-size:11px; font-weight:900">Cevap Hızı</label>
+                <label style="font-size:11px; font-weight:900">CEVAP HIZI</label>
                 <div class="modern-controls">
                     <button class="btn-ctrl" onclick="adjustConfig('speed', -5)">-</button>
                     <div class="ctrl-val"><span id="speed-val">20</span>MS</div>
                     <button class="btn-ctrl" onclick="adjustConfig('speed', 5)">+</button>
                 </div>
             </div>
-            <button id="cors-btn" class="btn btn-orange" onclick="window.open('https://cors-anywhere.herokuapp.com/corsdemo')">CORS İZNİ AL 🔑</button>
             <button class="btn btn-danger" onclick="confirmClearAll()">Tüm Sohbet ve Hafızayı Sil</button>
             <button class="btn btn-gray" onclick="closeModals()">KAPAT</button>
         </div>
@@ -164,8 +155,7 @@
 
     <script>
         const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
-let API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
-function updateProxy(val) { /* Boş bıraktık hata vermesin diye */ }
+        const API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
 
         let chats = JSON.parse(localStorage.getItem('khoj_chats')) || {};
         let activeChatId = localStorage.getItem('khoj_active_id');
@@ -181,12 +171,12 @@ function updateProxy(val) { /* Boş bıraktık hata vermesin diye */ }
 
         window.onload = () => {
             applyConfig();
-            updateProxy(currentProxy);
-            if(document.getElementById('proxy-select')) {
-                document.getElementById('proxy-select').value = currentProxy;
+            if (!activeChatId || !chats[activeChatId]) {
+                createNewChat();
+            } else { 
+                renderChatList(); 
+                loadActiveChat(); 
             }
-            if (!activeChatId || !chats[activeChatId]) createNewChat();
-            else { renderChatList(); loadActiveChat(); }
         };
 
         const screen = document.getElementById('chat-screen');
@@ -205,12 +195,17 @@ function updateProxy(val) { /* Boş bıraktık hata vermesin diye */ }
             const id = 'chat_' + Date.now();
             chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false };
             activeChatId = id;
-            saveAll(); renderChatList(); loadActiveChat(); closeSidebar();
+            saveAll(); 
+            renderChatList(); 
+            loadActiveChat(); 
+            closeSidebar();
         }
 
         function loadActiveChat() {
             screen.innerHTML = '';
-            if (chats[activeChatId]) chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false));
+            if (chats[activeChatId]) {
+                chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false));
+            }
             screen.scrollTop = screen.scrollHeight;
             renderChatList();
         }
@@ -233,14 +228,14 @@ function updateProxy(val) { /* Boş bıraktık hata vermesin diye */ }
 
             input.value = ''; input.style.height = '48px';
             
-            // NOKTALARI GÖSTER VE KAYDIR
             const thinking = document.getElementById('thinking');
             thinking.style.display = 'flex';
-            screen.appendChild(thinking); // Noktaları en sona taşı
+            screen.appendChild(thinking);
             screen.scrollTop = screen.scrollHeight;
 
             await fetchAI(finalMsg);
-            saveAll(); renderChatList();
+            saveAll(); 
+            renderChatList();
         }
 
         async function fetchAI(query) {
@@ -277,7 +272,10 @@ function updateProxy(val) { /* Boş bıraktık hata vermesin diye */ }
                     } 
                 }
                 typeWriter();
-            } else { d.textContent = text; screen.scrollTop = screen.scrollHeight; }
+            } else { 
+                d.textContent = text; 
+                screen.scrollTop = screen.scrollHeight; 
+            }
         }
 
         function renderChatList() {
