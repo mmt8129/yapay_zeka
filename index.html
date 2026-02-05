@@ -172,7 +172,6 @@
 
         window.onload = () => {
             applyConfig();
-            // Eğer chats boşsa veya activeChatId geçersizse temizle ve yeni aç
             if (Object.keys(chats).length === 0 || !activeChatId || !chats[activeChatId]) {
                 createNewChat();
             } else { 
@@ -202,9 +201,7 @@
             chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false };
             activeChatId = id;
             saveAll(); 
-            renderChatList(); 
-            loadActiveChat(); 
-            closeSidebar();
+            location.reload(); // ABİ: Sayfa yenileme eklendi
         }
 
         function loadActiveChat() {
@@ -218,10 +215,8 @@
         async function handleSend() {
             const input = document.getElementById('user-input');
             let text = input.value.trim();
-            
             if(!text) return;
 
-            // Güvenlik: Eğer bir şekilde activeChatId bozulmuşsa düzelt
             if(!activeChatId || !chats[activeChatId]) {
                 activeChatId = 'chat_' + Date.now();
                 chats[activeChatId] = { title: "YENİ SOHBET", messages: [], sysSent: false };
@@ -229,7 +224,6 @@
 
             const currentChatId = activeChatId; 
             isUserScrolling = false;
-
             let finalMsg = text;
             if(config.systemPrompt && !chats[currentChatId].sysSent) {
                 finalMsg = config.systemPrompt + "\n\n" + text;
@@ -241,12 +235,10 @@
             
             if(chats[currentChatId].title === "YENİ SOHBET") {
                 chats[currentChatId].title = text.substring(0,25).toUpperCase();
-                renderChatList();
             }
 
             input.value = ''; 
             input.style.height = '48px';
-            
             const thinking = document.getElementById('thinking');
             thinking.style.display = 'flex';
             screen.appendChild(thinking);
@@ -264,16 +256,12 @@
                     body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" })
                 });
                 const data = await response.json();
-                
                 const thinking = document.getElementById('thinking');
                 if(thinking) thinking.style.display = 'none';
 
                 if(data.response && chats[chatId]) {
                     let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim();
-                    
                     chats[chatId].messages.push({text: clean, type:'khoj-message'});
-                    
-                    // Sadece hala o sohbetteysek ekrana yazdır
                     if(chatId === activeChatId) {
                         displayMessage(clean, 'khoj-message', true);
                     }
@@ -289,7 +277,6 @@
             const d = document.createElement('div');
             d.className = `message ${type}`;
             screen.appendChild(d);
-            
             if(animate) {
                 let i = 0; 
                 d.textContent = "";
@@ -311,18 +298,11 @@
             const list = document.getElementById('chat-list');
             if(!list) return;
             list.innerHTML = '';
-            
-            const sortedIds = Object.keys(chats).sort((a,b) => {
-                const timeA = parseInt(a.split('_')[1]) || 0;
-                const timeB = parseInt(b.split('_')[1]) || 0;
-                return timeB - timeA;
-            });
-
+            const sortedIds = Object.keys(chats).sort((a,b) => (parseInt(b.split('_')[1]) || 0) - (parseInt(a.split('_')[1]) || 0));
             sortedIds.forEach(id => {
                 const item = document.createElement('div');
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 item.innerText = chats[id].title || "SOHBET";
-                
                 item.ontouchstart = (e) => {
                     pressTimer = setTimeout(() => {
                         selectedChatId = id;
@@ -332,14 +312,11 @@
                     }, 600);
                 };
                 item.ontouchend = () => clearTimeout(pressTimer);
-
                 item.onclick = () => { 
                     if(activeChatId === id) { closeSidebar(); return; }
                     activeChatId = id; 
                     saveAll(); 
-                    loadActiveChat(); 
-                    closeSidebar(); 
-                    renderChatList();
+                    location.reload(); // ABİ: Sayfa yenileme eklendi
                 };
                 list.appendChild(item);
             });
@@ -354,17 +331,14 @@
         }
 
         function deleteChat() {
-            if(Object.keys(chats).length <= 1) {
-                alert("SON SOHBETİ SİLEMEZSİN");
-                return;
-            }
+            if(Object.keys(chats).length <= 1) { alert("SON SOHBETİ SİLEMEZSİN"); return; }
             if(confirm("BU SOHBET KALICI OLARAK SİLİNECEK?")) {
                 delete chats[selectedChatId];
                 if(activeChatId === selectedChatId) {
                     activeChatId = Object.keys(chats)[0];
-                    loadActiveChat();
                 }
-                saveAll(); renderChatList(); closeModals();
+                saveAll(); 
+                location.reload();
             }
         }
 
@@ -381,13 +355,10 @@
             const sVal = document.getElementById('speed-val');
             if(fVal) fVal.innerText = config.font;
             if(sVal) sVal.innerText = config.speed;
-            
             const sp = document.getElementById('system-prompt');
             if(sp) sp.value = config.systemPrompt || '';
-            
             document.documentElement.style.setProperty('--font-size', config.font + 'px');
             document.body.setAttribute('data-theme', config.theme);
-            
             const ts = document.getElementById('theme-select');
             if(ts) ts.value = config.theme;
         }
@@ -411,7 +382,6 @@
             this.style.height = 'auto'; 
             this.style.height = (this.scrollHeight) + 'px'; 
         });
-
     </script>
 </body>
 </html>
