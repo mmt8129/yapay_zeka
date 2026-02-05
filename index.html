@@ -7,7 +7,6 @@
     
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -166,13 +165,15 @@
 
         function updateClock() {
             const now = new Date();
-            document.getElementById('live-clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            const clock = document.getElementById('live-clock');
+            if(clock) clock.innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
         }
         setInterval(updateClock, 1000); updateClock();
 
         window.onload = () => {
             applyConfig();
-            if (!activeChatId || !chats[activeChatId]) {
+            // Eğer chats boşsa veya activeChatId geçersizse temizle ve yeni aç
+            if (Object.keys(chats).length === 0 || !activeChatId || !chats[activeChatId]) {
                 createNewChat();
             } else { 
                 renderChatList(); 
@@ -211,45 +212,51 @@
             screen.innerHTML = '';
             chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false));
             screen.scrollTop = screen.scrollHeight;
+            isUserScrolling = false;
         }
 
         async function handleSend() {
             const input = document.getElementById('user-input');
             let text = input.value.trim();
             
-            // Burayı sağlamlaştırdık abi
             if(!text) return;
+
+            // Güvenlik: Eğer bir şekilde activeChatId bozulmuşsa düzelt
             if(!activeChatId || !chats[activeChatId]) {
-                const id = 'chat_' + Date.now();
-                chats[id] = { title: text.substring(0,25).toUpperCase(), messages: [], sysSent: false };
-                activeChatId = id;
+                activeChatId = 'chat_' + Date.now();
+                chats[activeChatId] = { title: "YENİ SOHBET", messages: [], sysSent: false };
             }
 
+            const currentChatId = activeChatId; 
             isUserScrolling = false;
 
             let finalMsg = text;
-            if(config.systemPrompt && !chats[activeChatId].sysSent) {
+            if(config.systemPrompt && !chats[currentChatId].sysSent) {
                 finalMsg = config.systemPrompt + "\n\n" + text;
-                chats[activeChatId].sysSent = true;
+                chats[currentChatId].sysSent = true;
             }
 
             displayMessage(text, 'user-message', false);
-            chats[activeChatId].messages.push({text: text, type:'user-message'});
-            if(chats[activeChatId].title === "YENİ SOHBET") chats[activeChatId].title = text.substring(0,25).toUpperCase();
+            chats[currentChatId].messages.push({text: text, type:'user-message'});
+            
+            if(chats[currentChatId].title === "YENİ SOHBET") {
+                chats[currentChatId].title = text.substring(0,25).toUpperCase();
+                renderChatList();
+            }
 
-            input.value = ''; input.style.height = '48px';
+            input.value = ''; 
+            input.style.height = '48px';
             
             const thinking = document.getElementById('thinking');
             thinking.style.display = 'flex';
             screen.appendChild(thinking);
             screen.scrollTop = screen.scrollHeight;
 
-            await fetchAI(finalMsg);
+            await fetchAI(finalMsg, currentChatId);
             saveAll(); 
-            renderChatList();
         }
 
-        async function fetchAI(query) {
+        async function fetchAI(query, chatId) {
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -257,18 +264,24 @@
                     body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" })
                 });
                 const data = await response.json();
-                document.getElementById('thinking').style.display = 'none';
-                if(data.response) {
+                
+                const thinking = document.getElementById('thinking');
+                if(thinking) thinking.style.display = 'none';
+
+                if(data.response && chats[chatId]) {
                     let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim();
-                    displayMessage(clean, 'khoj-message', true);
-                    // Kaydederken doğru ID'ye kaydettiğimizden emin oluyoruz
-                    if(chats[activeChatId]) {
-                        chats[activeChatId].messages.push({text: clean, type:'khoj-message'});
+                    
+                    chats[chatId].messages.push({text: clean, type:'khoj-message'});
+                    
+                    // Sadece hala o sohbetteysek ekrana yazdır
+                    if(chatId === activeChatId) {
+                        displayMessage(clean, 'khoj-message', true);
                     }
+                    saveAll();
                 }
             } catch(e) { 
                 document.getElementById('thinking').style.display = 'none';
-                displayMessage("BAĞLANTI HATASI!", 'khoj-message', false);
+                if(chatId === activeChatId) displayMessage("BAĞLANTI HATASI!", 'khoj-message', false);
             }
         }
 
@@ -276,8 +289,10 @@
             const d = document.createElement('div');
             d.className = `message ${type}`;
             screen.appendChild(d);
+            
             if(animate) {
                 let i = 0; 
+                d.textContent = "";
                 function typeWriter() { 
                     if(i < text.length) { 
                         d.textContent += text.charAt(i++); 
@@ -294,18 +309,21 @@
 
         function renderChatList() {
             const list = document.getElementById('chat-list');
+            if(!list) return;
             list.innerHTML = '';
+            
             const sortedIds = Object.keys(chats).sort((a,b) => {
-                const timeA = parseInt(a.split('_')[1]);
-                const timeB = parseInt(b.split('_')[1]);
+                const timeA = parseInt(a.split('_')[1]) || 0;
+                const timeB = parseInt(b.split('_')[1]) || 0;
                 return timeB - timeA;
             });
 
             sortedIds.forEach(id => {
                 const item = document.createElement('div');
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
-                item.innerText = chats[id].title;
-                item.onmousedown = item.ontouchstart = (e) => {
+                item.innerText = chats[id].title || "SOHBET";
+                
+                item.ontouchstart = (e) => {
                     pressTimer = setTimeout(() => {
                         selectedChatId = id;
                         document.getElementById('edit-chat-name').value = chats[id].title;
@@ -313,13 +331,15 @@
                         if(navigator.vibrate) navigator.vibrate(50);
                     }, 600);
                 };
-                item.onmouseup = item.ontouchend = () => clearTimeout(pressTimer);
+                item.ontouchend = () => clearTimeout(pressTimer);
+
                 item.onclick = () => { 
+                    if(activeChatId === id) { closeSidebar(); return; }
                     activeChatId = id; 
                     saveAll(); 
                     loadActiveChat(); 
                     closeSidebar(); 
-                    renderChatList(); // Listeyi yenileyip turuncu noktayı koy
+                    renderChatList();
                 };
                 list.appendChild(item);
             });
@@ -334,11 +354,17 @@
         }
 
         function deleteChat() {
-            if(Object.keys(chats).length <= 1) return alert("SON SOHBETİ SİLEMEZSİN");
+            if(Object.keys(chats).length <= 1) {
+                alert("SON SOHBETİ SİLEMEZSİN");
+                return;
+            }
             if(confirm("BU SOHBET KALICI OLARAK SİLİNECEK?")) {
                 delete chats[selectedChatId];
-                if(activeChatId === selectedChatId) activeChatId = Object.keys(chats)[0];
-                saveAll(); renderChatList(); loadActiveChat(); closeModals();
+                if(activeChatId === selectedChatId) {
+                    activeChatId = Object.keys(chats)[0];
+                    loadActiveChat();
+                }
+                saveAll(); renderChatList(); closeModals();
             }
         }
 
@@ -351,12 +377,17 @@
         function updateTheme(val) { config.theme = val; applyConfig(); }
 
         function applyConfig() {
-            document.getElementById('font-val').innerText = config.font;
-            document.getElementById('speed-val').innerText = config.speed;
+            const fVal = document.getElementById('font-val');
+            const sVal = document.getElementById('speed-val');
+            if(fVal) fVal.innerText = config.font;
+            if(sVal) sVal.innerText = config.speed;
+            
             const sp = document.getElementById('system-prompt');
             if(sp) sp.value = config.systemPrompt || '';
+            
             document.documentElement.style.setProperty('--font-size', config.font + 'px');
             document.body.setAttribute('data-theme', config.theme);
+            
             const ts = document.getElementById('theme-select');
             if(ts) ts.value = config.theme;
         }
@@ -369,11 +400,18 @@
             localStorage.setItem('khoj_config', JSON.stringify(config));
         }
 
-        function confirmClearAll() { if(confirm("HER ŞEY SİLİNSİN Mİ?")) { localStorage.clear(); location.reload(); } }
-        document.getElementById('user-input').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
+        function confirmClearAll() { 
+            if(confirm("HER ŞEY SİLİNSİN Mİ?")) { 
+                localStorage.clear(); 
+                location.reload(); 
+            } 
+        }
+        
+        document.getElementById('user-input').addEventListener('input', function() { 
+            this.style.height = 'auto'; 
+            this.style.height = (this.scrollHeight) + 'px'; 
+        });
 
     </script>
 </body>
 </html>
-
-bu benim chatbotum, bikaç soru ve düzenlemeler yapmak istiyorum yardım et
