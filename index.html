@@ -56,7 +56,10 @@
         #user-input { flex: 1; background: var(--input-bg); border: 1px solid #ccc; border-radius: 20px; padding: 12px 18px; color: #000; font-size: 16px; min-height: 48px; max-height: 150px; resize: none; }
         .send-btn { font-size: 40px; color: var(--accent); cursor: pointer; }
 
-        #thinking { display: none; text-align: center; color: var(--accent); font-size: 13px; padding: 12px; margin: 0 20px 15px; border: 2px solid var(--accent); border-radius: 15px; font-weight: 900; background: rgba(255, 75, 43, 0.1); }
+        /* YENİ NOKTA ANİMASYONU STİLLERİ */
+        .typing-dots { display: none; gap: 8px; padding: 15px 18px; margin-left: 10%; margin-bottom: 20px; align-self: flex-start; }
+        .dot { width: 12px; height: 12px; background-color: var(--accent); border-radius: 50%; opacity: 0; animation: dotFlow 3s infinite; }
+        @keyframes dotFlow { 0%, 100% { opacity: 0; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 400; backdrop-filter: blur(10px); }
         .modal-box { background: var(--bg-color); width: 92%; max-width: 380px; padding: 25px; border-radius: 25px; border: 2px solid var(--accent); color: var(--text-color); max-height: 85vh; overflow-y: auto; }
@@ -75,12 +78,12 @@
 </head>
 <body data-theme="dark">
 
-    <div class="menu-btn" onclick="openSidebar()">?</div>
+    <div class="menu-btn" onclick="openSidebar()">☰</div>
     <div class="clock-panel" id="live-clock">00:00</div>
 
     <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
     <div id="sidebar" class="sidebar">
-        <div class="sidebar-section" onclick="openSettings()">AYARLAR </div>
+        <div class="sidebar-section" onclick="openSettings()">AYARLAR ⚙️</div>
         <div class="sidebar-section" onclick="createNewChat()">YENİ SOHBET +</div>
         <div id="chat-list" class="chat-list-container"></div>
     </div>
@@ -93,18 +96,26 @@
                 <textarea id="edit-chat-name" rows="1"></textarea>
             </div>
             <button class="btn btn-orange" onclick="saveChatName()">Yeniden Adlandır</button>
-            <button class="btn btn-danger" onclick="deleteChat()">Sil </button>
+            <button class="btn btn-danger" onclick="deleteChat()">Sil 🗑️</button>
             <button class="btn btn-gray" onclick="closeModals()">Vazgeç</button>
         </div>
     </div>
 
     <div id="chat-screen"></div>
-    <div id="thinking">KHOJ YAZIYOR... ?</div>
+
+    <div id="thinking" class="typing-dots">
+        <div class="dot" style="animation-delay: 0.0s"></div>
+        <div class="dot" style="animation-delay: 0.5s"></div>
+        <div class="dot" style="animation-delay: 1.0s"></div>
+        <div class="dot" style="animation-delay: 1.5s"></div>
+        <div class="dot" style="animation-delay: 2.0s"></div>
+        <div class="dot" style="animation-delay: 2.5s"></div>
+    </div>
 
     <div class="input-wrapper">
         <div class="input-container">
             <textarea id="user-input" rows="1" placeholder="Buraya yaz abi..."></textarea>
-            <div class="send-btn" onclick="handleSend()">?</div>
+            <div class="send-btn" onclick="handleSend()">➤</div>
         </div>
     </div>
 
@@ -123,12 +134,12 @@
                 </select>
             </div>
             <div class="setting-item">
-    <label style="font-size:11px; font-weight:900">BAĞLANTI KÖPRÜSÜ (PROXY)</label>
-    <select id="proxy-select" onchange="updateProxy(this.value)">
-        <option value="heroku">HEROKUAPP (İzin Gerekir)</option>
-        <option value="io">CORSPROXY.IO (Hızlı/Doğrudan)</option>
-    </select>
-</div>
+                <label style="font-size:11px; font-weight:900">BAĞLANTI KÖPRÜSÜ (PROXY)</label>
+                <select id="proxy-select" onchange="updateProxy(this.value)">
+                    <option value="heroku">HEROKUAPP (İzin Gerekir)</option>
+                    <option value="io">CORSPROXY.IO (Hızlı/Doğrudan)</option>
+                </select>
+            </div>
             <div class="setting-item">
                 <label style="font-size:11px; font-weight:900">YAZI BOYUTU</label>
                 <div class="modern-controls">
@@ -145,7 +156,7 @@
                     <button class="btn-ctrl" onclick="adjustConfig('speed', 5)">+</button>
                 </div>
             </div>
-            <button id="cors-btn" class="btn btn-orange" onclick="window.open('https://cors-anywhere.herokuapp.com/corsdemo')">CORS Seçimi ??</button>
+            <button id="cors-btn" class="btn btn-orange" onclick="window.open('https://cors-anywhere.herokuapp.com/corsdemo')">CORS İZNİ AL 🔑</button>
             <button class="btn btn-danger" onclick="confirmClearAll()">Tüm Sohbet ve Hafızayı Sil</button>
             <button class="btn btn-gray" onclick="closeModals()">KAPAT</button>
         </div>
@@ -181,15 +192,12 @@
         }
         setInterval(updateClock, 1000); updateClock();
 
-      window.onload = () => {
+        window.onload = () => {
             applyConfig();
-            
-            // PROXY AYARINI BURAYA EKLE ABİ
             updateProxy(currentProxy);
             if(document.getElementById('proxy-select')) {
                 document.getElementById('proxy-select').value = currentProxy;
             }
-
             if (!activeChatId || !chats[activeChatId]) createNewChat();
             else { renderChatList(); loadActiveChat(); }
         };
@@ -237,7 +245,13 @@
             if(chats[activeChatId].title === "YENİ SOHBET") chats[activeChatId].title = text.substring(0,25).toUpperCase();
 
             input.value = ''; input.style.height = '48px';
-            document.getElementById('thinking').style.display = 'block';
+            
+            // NOKTALARI GÖSTER VE KAYDIR
+            const thinking = document.getElementById('thinking');
+            thinking.style.display = 'flex';
+            screen.appendChild(thinking); // Noktaları en sona taşı
+            screen.scrollTop = screen.scrollHeight;
+
             await fetchAI(finalMsg);
             saveAll(); renderChatList();
         }
@@ -286,8 +300,6 @@
                 const item = document.createElement('div');
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 item.innerText = chats[id].title;
-                
-                // BASILI TUTMA VE TIKLAMA MANTIĞI
                 item.onmousedown = item.ontouchstart = (e) => {
                     pressTimer = setTimeout(() => {
                         selectedChatId = id;
@@ -297,10 +309,7 @@
                     }, 600);
                 };
                 item.onmouseup = item.ontouchend = () => clearTimeout(pressTimer);
-                item.onclick = () => { 
-                    activeChatId = id; saveAll(); loadActiveChat(); closeSidebar(); 
-                };
-
+                item.onclick = () => { activeChatId = id; saveAll(); loadActiveChat(); closeSidebar(); };
                 list.appendChild(item);
             });
         }
@@ -349,15 +358,6 @@
         function confirmClearAll() { if(confirm("HER ŞEY SİLİNSİN Mİ?")) { localStorage.clear(); location.reload(); } }
         document.getElementById('user-input').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('PWA Kaydı Başarılı!');
-                }).catch(err => {
-                    console.log('PWA Hatası:', err);
-                });
-            });
-        }
     </script>
 </body>
 </html>
