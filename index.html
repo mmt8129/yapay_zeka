@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
- <link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Khoj Smart Pro</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -17,14 +19,14 @@
             --khoj-border: #ff4b2b;
             --accent: #ff4b2b;
             --font-size: 14px;
-            --panel-bg: rgba(0, 0, 0, 0.3);
+            --panel-bg: rgba(0, 0, 0, 0.5);
             --input-bg: #ffffff;
         }
 
         [data-theme="white"] {
             --bg-color: #ffffff;
             --text-color: #000000;
-            --panel-bg: rgba(255, 255, 255, 0.3);
+            --panel-bg: rgba(255, 255, 255, 0.2);
             --input-bg: #f0f0f0;
             --khoj-border: #ff4b2b;
         }
@@ -32,8 +34,8 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-color); overflow: hidden; transition: background 0.3s, color 0.3s; }
         
-        .menu-btn { position: fixed; top: 15px; left: 15px; font-size: 32px; cursor: pointer; color: var(--accent); z-index: 200; }
-        .clock-panel { position: fixed; top: 3px; left: 50%; transform: translateX(-50%); background: var(--panel-bg); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--accent); z-index: 150; color: var(--accent); font-weight: 900; font-size: 16px; letter-spacing: 1px; }
+        .menu-btn { position: fixed; top: 5px; left: 15px; font-size: 32px; cursor: pointer; color: var(--accent); z-index: 200; }
+        .clock-panel { position: fixed; top: 5px; left: 50%; transform: translateX(-50%); background: var(--panel-bg); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--accent); z-index: 150; color: var(--accent); font-weight: 900; font-size: 16px; letter-spacing: 1px; }
 
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 300; backdrop-filter: blur(5px); }
         .sidebar { position: fixed; left: -75%; top: 0; width: 75%; height: 100%; background: var(--bg-color); z-index: 301; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px 15px; border-right: 2px solid var(--accent); }
@@ -41,13 +43,13 @@
         
         .sidebar-section { border: 2px solid var(--accent); border-radius: 15px; padding: 12px; margin-bottom: 15px; cursor: pointer; text-align: center; font-weight: 900; color: var(--accent); font-size: 14px; text-transform: uppercase; }
         .chat-list-container { height: calc(100% - 150px); overflow-y: auto; margin-top: 5px; border: 1.5px solid var(--accent); border-radius: 15px; padding: 10px; background: rgba(128,128,128,0.1); }
-        .chat-item { padding: 12px; border-radius: 10px; margin-bottom: 8px; background: rgba(128,128,128,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; color: var(--accent); font-weight: 900; text-transform: uppercase; }
+        .chat-item { padding: 12px; border-radius: 10px; margin-bottom: 8px; background: rgba(128,128,128,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; color: var(--accent); font-weight: 900; text-transform: uppercase; user-select: none; -webkit-user-select: none; }
         .chat-item.active { border-color: var(--accent); background: rgba(255, 75, 43, 0.2); }
 
         #chat-screen { height: 100%; overflow-y: auto; padding: 80px 15px 160px; display: flex; flex-direction: column; }
         .message { margin-bottom: 20px; padding: 15px 18px; border-radius: 20px; max-width: 95%; line-height: 1.6; font-size: var(--font-size); word-wrap: break-word; white-space: pre-wrap; }
-        .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; margin-left: 15%; }
-        .khoj-message { align-self: flex-start; background: transparent; border: 2px solid var(--khoj-border); color: var(--text-color); border-bottom-left-radius: 4px; margin-left: 3%; margin-right: 3%; }
+        .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; margin-left: 5%; }
+        .khoj-message { align-self: flex-start; background: transparent; border: 2px solid var(--khoj-border); color: var(--text-color); border-bottom-left-radius: 4px; margin-right: 5%; margin-left: 10%; }
 
         .input-wrapper { position: fixed; bottom: 0; width: 100%; background: var(--bg-color); border-top: 1px solid rgba(128,128,128,0.2); padding: 15px 15px calc(15px + env(safe-area-inset-bottom)); z-index: 100; }
         .input-container { display: flex; align-items: flex-end; gap: 10px; max-width: 800px; margin: 0 auto; }
@@ -81,6 +83,19 @@
         <div class="sidebar-section" onclick="openSettings()">AYARLAR ⚙️</div>
         <div class="sidebar-section" onclick="createNewChat()">YENİ SOHBET ＋</div>
         <div id="chat-list" class="chat-list-container"></div>
+    </div>
+
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="margin-top:0; color:var(--accent); text-align:center; font-weight: 900;">SOHBETİ DÜZENLE</h3>
+            <div class="setting-item">
+                <label style="font-size:11px; font-weight:900">YENİ İSİM</label>
+                <textarea id="edit-chat-name" rows="1"></textarea>
+            </div>
+            <button class="btn btn-orange" onclick="saveChatName()">İSMİ GÜNCELLE ✏️</button>
+            <button class="btn btn-danger" onclick="deleteChat()">SOHBETİ SİL 🗑️</button>
+            <button class="btn btn-gray" onclick="closeModals()">VAZGEÇ</button>
+        </div>
     </div>
 
     <div id="chat-screen"></div>
@@ -130,13 +145,14 @@
     </div>
 
     <script>
-        const API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
+        const API_URL = 'https://corsproxy.io/?https://app.khoj.dev/api/chat';
         const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
 
         let chats = JSON.parse(localStorage.getItem('khoj_chats')) || {};
         let activeChatId = localStorage.getItem('khoj_active_id');
         let config = JSON.parse(localStorage.getItem('khoj_config')) || { speed: 20, font: 14, theme: 'dark', systemPrompt: '' };
         let isUserScrolling = false;
+        let pressTimer, selectedChatId;
 
         function updateClock() {
             const now = new Date();
@@ -151,15 +167,10 @@
         };
 
         const screen = document.getElementById('chat-screen');
-        
-        // KİLİTLENME ÇÖZÜMÜ: Kullanıcı kaydırdığında takibi bırak
         screen.addEventListener('touchstart', () => { isUserScrolling = true; });
         screen.addEventListener('scroll', () => {
-            if (screen.scrollTop + screen.clientHeight < screen.scrollHeight - 50) {
-                isUserScrolling = true;
-            } else {
-                isUserScrolling = false;
-            }
+            if (screen.scrollTop + screen.clientHeight < screen.scrollHeight - 50) isUserScrolling = true;
+            else isUserScrolling = false;
         });
 
         function openSidebar() { document.getElementById('sidebar-overlay').style.display = 'block'; document.getElementById('sidebar').classList.add('active'); }
@@ -185,7 +196,7 @@
             const input = document.getElementById('user-input');
             let text = input.value.trim();
             if(!text) return;
-            isUserScrolling = false; // Yeni mesajda otomatik aşağı kaydır
+            isUserScrolling = false;
 
             let finalMsg = text;
             if(config.systemPrompt && !chats[activeChatId].sysSent) {
@@ -199,7 +210,6 @@
 
             input.value = ''; input.style.height = '48px';
             document.getElementById('thinking').style.display = 'block';
-            
             await fetchAI(finalMsg);
             saveAll(); renderChatList();
         }
@@ -248,9 +258,40 @@
                 const item = document.createElement('div');
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 item.innerText = chats[id].title;
-                item.onclick = () => { activeChatId = id; saveAll(); loadActiveChat(); closeSidebar(); };
+                
+                // BASILI TUTMA VE TIKLAMA MANTIĞI
+                item.onmousedown = item.ontouchstart = (e) => {
+                    pressTimer = setTimeout(() => {
+                        selectedChatId = id;
+                        document.getElementById('edit-chat-name').value = chats[id].title;
+                        document.getElementById('edit-modal').style.display = 'flex';
+                        if(navigator.vibrate) navigator.vibrate(50);
+                    }, 600);
+                };
+                item.onmouseup = item.ontouchend = () => clearTimeout(pressTimer);
+                item.onclick = () => { 
+                    activeChatId = id; saveAll(); loadActiveChat(); closeSidebar(); 
+                };
+
                 list.appendChild(item);
             });
+        }
+
+        function saveChatName() {
+            const newName = document.getElementById('edit-chat-name').value.trim().toUpperCase();
+            if(newName) {
+                chats[selectedChatId].title = newName;
+                saveAll(); renderChatList(); closeModals();
+            }
+        }
+
+        function deleteChat() {
+            if(Object.keys(chats).length <= 1) return alert("SON SOHBETİ SİLEMEZSİN ABİ!");
+            if(confirm("BU SOHBET KALICI OLARAK SİLİNECEK?")) {
+                delete chats[selectedChatId];
+                if(activeChatId === selectedChatId) activeChatId = Object.keys(chats)[0];
+                saveAll(); renderChatList(); loadActiveChat(); closeModals();
+            }
         }
 
         function adjustConfig(type, val) {
@@ -279,16 +320,16 @@
 
         function confirmClearAll() { if(confirm("HER ŞEY SİLİNSİN Mİ?")) { localStorage.clear(); location.reload(); } }
         document.getElementById('user-input').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').then(reg => {
-            console.log('PWA Kaydı Başarılı Abi!');
-        }).catch(err => {
-            console.log('PWA Kayıt Hatası:', err);
-        });
-    });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('PWA Kaydı Başarılı!');
+                }).catch(err => {
+                    console.log('PWA Hatası:', err);
+                });
+            });
         }
-        
     </script>
 </body>
 </html>
