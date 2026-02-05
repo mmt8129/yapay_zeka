@@ -7,7 +7,6 @@
     
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    
     <link rel="apple-touch-icon" href="icon.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -166,116 +165,15 @@
 
         function updateClock() {
             const now = new Date();
-            document.getElementById('live-clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            const clock = document.getElementById('live-clock');
+            if(clock) clock.innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
         }
         setInterval(updateClock, 1000); updateClock();
 
         window.onload = () => {
             applyConfig();
-            if (!activeChatId || !chats[activeChatId]) {
-                createNewChat();
-            } else { 
-                renderChatList(); 
-                loadActiveChat(); 
-            }
-        };
-
-        const screen = document.getElementById('chat-screen');
-        screen.addEventListener('touchstart', () => { isUserScrolling = true; });
-        screen.addEventListener('scroll', () => {
-            if (screen.scrollTop + screen.clientHeight < screen.scrollHeight - 50) isUserScrolling = true;
-            else isUserScrolling = false;
-        });
-
-        function openSidebar() { document.getElementById('sidebar-overlay').style.display = 'block'; document.getElementById('sidebar').classList.add('active'); }
-        function closeSidebar() { document.getElementById('sidebar-overlay').style.display = 'none'; document.getElementById('sidebar').classList.remove('active'); }
-        function openSettings() { closeSidebar(); document.getElementById('settings-modal').style.display = 'flex'; }
-        
-        function closeModals() { 
-            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); 
-            saveAll(); 
-        }
-
-        function createNewChat() {
-            const id = 'chat_' + Date.now();
-            chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false };
-            activeChatId = id;
-            saveAll(); 
-            renderChatList(); 
-            loadActiveChat(); 
-            closeSidebar();
-        }
-
-        function loadActiveChat() {
-            if (!activeChatId || !chats[activeChatId]) return;
-            screen.innerHTML = '';
-            chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false));
-            screen.scrollTop = screen.scrollHeight;
-        }
-
-        async function handleSend() {
-            const input = document.getElementById('user-input');
-            let text = input.value.trim();
-            
-            // Burayı sağlamlaştırdık abi
-            if(!text) return;
-            if(!activeChatId || !chats[activeChatId]) {
-                const id = 'chat_' + Date.now();
-                chats[id] = { title: text.substring(0,25).toUpperCase(), messages: [], sysSent: false };
-                activeChatId = id;
-            }
-
-            isUserScrolling = false;
-
-            let finalMsg = text;
-            if(config.systemPrompt && !chats[activeChatId].sysSent) {
-                finalMsg = config.systemPrompt + "\n\n" + text;
-                chats[activeChatId].sysSent = true;
-            }
-
-            displayMessage(text, 'user-message', false);
-            chats[activeChatId].messages.push({text: text, type:'user-message'});
-            if(chats[activeChatId].title === "YENİ SOHBET") chats[activeChatId].title = text.substring(0,25).toUpperCase();
-
-            input.value = ''; input.style.height = '48px';
-            
-            const thinking = document.getElementById('thinking');
-            thinking.style.display = 'flex';
-            screen.appendChild(thinking);
-            screen.scrollTop = screen.scrollHeight;
-
-            await fetchAI(finalMsg);
-            saveAll(); 
-            renderChatList();
-        }
-
-        async function fetchAI(query) {
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" })
-                });
-                const data = await response.json();
-    <script>
-        const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
-        const API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
-
-        let chats = JSON.parse(localStorage.getItem('khoj_chats')) || {};
-        let activeChatId = localStorage.getItem('khoj_active_id');
-        let config = JSON.parse(localStorage.getItem('khoj_config')) || { speed: 20, font: 14, theme: 'dark', systemPrompt: '' };
-        let isUserScrolling = false;
-        let pressTimer, selectedChatId;
-
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('live-clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        }
-        setInterval(updateClock, 1000); updateClock();
-
-        window.onload = () => {
-            applyConfig();
-            if (!activeChatId || !chats[activeChatId]) {
+            // Eğer chats boşsa veya activeChatId geçersizse temizle ve yeni aç
+            if (Object.keys(chats).length === 0 || !activeChatId || !chats[activeChatId]) {
                 createNewChat();
             } else { 
                 renderChatList(); 
@@ -323,26 +221,26 @@
             
             if(!text) return;
 
-            // ID ve Obje kontrolünü sağlama alalım abi
+            // Güvenlik: Eğer bir şekilde activeChatId bozulmuşsa düzelt
             if(!activeChatId || !chats[activeChatId]) {
                 activeChatId = 'chat_' + Date.now();
-                chats[activeChatId] = { title: text.substring(0,25).toUpperCase(), messages: [], sysSent: false };
+                chats[activeChatId] = { title: "YENİ SOHBET", messages: [], sysSent: false };
             }
 
-            const currentChat = chats[activeChatId];
+            const currentChatId = activeChatId; 
             isUserScrolling = false;
 
             let finalMsg = text;
-            if(config.systemPrompt && !currentChat.sysSent) {
+            if(config.systemPrompt && !chats[currentChatId].sysSent) {
                 finalMsg = config.systemPrompt + "\n\n" + text;
-                currentChat.sysSent = true;
+                chats[currentChatId].sysSent = true;
             }
 
             displayMessage(text, 'user-message', false);
-            currentChat.messages.push({text: text, type:'user-message'});
+            chats[currentChatId].messages.push({text: text, type:'user-message'});
             
-            if(currentChat.title === "YENİ SOHBET") {
-                currentChat.title = text.substring(0,25).toUpperCase();
+            if(chats[currentChatId].title === "YENİ SOHBET") {
+                chats[currentChatId].title = text.substring(0,25).toUpperCase();
                 renderChatList();
             }
 
@@ -354,7 +252,7 @@
             screen.appendChild(thinking);
             screen.scrollTop = screen.scrollHeight;
 
-            await fetchAI(finalMsg, activeChatId);
+            await fetchAI(finalMsg, currentChatId);
             saveAll(); 
         }
 
@@ -366,15 +264,19 @@
                     body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" })
                 });
                 const data = await response.json();
-                document.getElementById('thinking').style.display = 'none';
+                
+                const thinking = document.getElementById('thinking');
+                if(thinking) thinking.style.display = 'none';
 
                 if(data.response && chats[chatId]) {
                     let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim();
-                    // Sadece hala o sohbetteysek ekrana bas
+                    
+                    chats[chatId].messages.push({text: clean, type:'khoj-message'});
+                    
+                    // Sadece hala o sohbetteysek ekrana yazdır
                     if(chatId === activeChatId) {
                         displayMessage(clean, 'khoj-message', true);
                     }
-                    chats[chatId].messages.push({text: clean, type:'khoj-message'});
                     saveAll();
                 }
             } catch(e) { 
@@ -387,6 +289,7 @@
             const d = document.createElement('div');
             d.className = `message ${type}`;
             screen.appendChild(d);
+            
             if(animate) {
                 let i = 0; 
                 d.textContent = "";
@@ -406,13 +309,19 @@
 
         function renderChatList() {
             const list = document.getElementById('chat-list');
+            if(!list) return;
             list.innerHTML = '';
-            const sortedIds = Object.keys(chats).sort((a,b) => b.split('_')[1] - a.split('_')[1]);
+            
+            const sortedIds = Object.keys(chats).sort((a,b) => {
+                const timeA = parseInt(a.split('_')[1]) || 0;
+                const timeB = parseInt(b.split('_')[1]) || 0;
+                return timeB - timeA;
+            });
 
             sortedIds.forEach(id => {
                 const item = document.createElement('div');
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
-                item.innerText = chats[id].title;
+                item.innerText = chats[id].title || "SOHBET";
                 
                 item.ontouchstart = (e) => {
                     pressTimer = setTimeout(() => {
@@ -445,7 +354,10 @@
         }
 
         function deleteChat() {
-            if(Object.keys(chats).length <= 1) return alert("SON SOHBETİ SİLEMEZSİN");
+            if(Object.keys(chats).length <= 1) {
+                alert("SON SOHBETİ SİLEMEZSİN");
+                return;
+            }
             if(confirm("BU SOHBET KALICI OLARAK SİLİNECEK?")) {
                 delete chats[selectedChatId];
                 if(activeChatId === selectedChatId) {
@@ -465,12 +377,17 @@
         function updateTheme(val) { config.theme = val; applyConfig(); }
 
         function applyConfig() {
-            document.getElementById('font-val').innerText = config.font;
-            document.getElementById('speed-val').innerText = config.speed;
+            const fVal = document.getElementById('font-val');
+            const sVal = document.getElementById('speed-val');
+            if(fVal) fVal.innerText = config.font;
+            if(sVal) sVal.innerText = config.speed;
+            
             const sp = document.getElementById('system-prompt');
             if(sp) sp.value = config.systemPrompt || '';
+            
             document.documentElement.style.setProperty('--font-size', config.font + 'px');
             document.body.setAttribute('data-theme', config.theme);
+            
             const ts = document.getElementById('theme-select');
             if(ts) ts.value = config.theme;
         }
@@ -483,10 +400,18 @@
             localStorage.setItem('khoj_config', JSON.stringify(config));
         }
 
-        function confirmClearAll() { if(confirm("HER ŞEY SİLİNSİN Mİ?")) { localStorage.clear(); location.reload(); } }
-        document.getElementById('user-input').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
+        function confirmClearAll() { 
+            if(confirm("HER ŞEY SİLİNSİN Mİ?")) { 
+                localStorage.clear(); 
+                location.reload(); 
+            } 
+        }
+        
+        document.getElementById('user-input').addEventListener('input', function() { 
+            this.style.height = 'auto'; 
+            this.style.height = (this.scrollHeight) + 'px'; 
+        });
 
     </script>
-
 </body>
 </html>
