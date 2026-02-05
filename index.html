@@ -257,18 +257,129 @@
                     body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" })
                 });
                 const data = await response.json();
+    <script>
+        const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
+        const API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
+
+        let chats = JSON.parse(localStorage.getItem('khoj_chats')) || {};
+        let activeChatId = localStorage.getItem('khoj_active_id');
+        let config = JSON.parse(localStorage.getItem('khoj_config')) || { speed: 20, font: 14, theme: 'dark', systemPrompt: '' };
+        let isUserScrolling = false;
+        let pressTimer, selectedChatId;
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        window.onload = () => {
+            applyConfig();
+            if (!activeChatId || !chats[activeChatId]) {
+                createNewChat();
+            } else { 
+                renderChatList(); 
+                loadActiveChat(); 
+            }
+        };
+
+        const screen = document.getElementById('chat-screen');
+        screen.addEventListener('touchstart', () => { isUserScrolling = true; });
+        screen.addEventListener('scroll', () => {
+            if (screen.scrollTop + screen.clientHeight < screen.scrollHeight - 50) isUserScrolling = true;
+            else isUserScrolling = false;
+        });
+
+        function openSidebar() { document.getElementById('sidebar-overlay').style.display = 'block'; document.getElementById('sidebar').classList.add('active'); }
+        function closeSidebar() { document.getElementById('sidebar-overlay').style.display = 'none'; document.getElementById('sidebar').classList.remove('active'); }
+        function openSettings() { closeSidebar(); document.getElementById('settings-modal').style.display = 'flex'; }
+        
+        function closeModals() { 
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); 
+            saveAll(); 
+        }
+
+        function createNewChat() {
+            const id = 'chat_' + Date.now();
+            chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false };
+            activeChatId = id;
+            saveAll(); 
+            renderChatList(); 
+            loadActiveChat(); 
+            closeSidebar();
+        }
+
+        function loadActiveChat() {
+            if (!activeChatId || !chats[activeChatId]) return;
+            screen.innerHTML = '';
+            chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false));
+            screen.scrollTop = screen.scrollHeight;
+            isUserScrolling = false;
+        }
+
+        async function handleSend() {
+            const input = document.getElementById('user-input');
+            let text = input.value.trim();
+            
+            if(!text) return;
+
+            // ID ve Obje kontrolünü sağlama alalım abi
+            if(!activeChatId || !chats[activeChatId]) {
+                activeChatId = 'chat_' + Date.now();
+                chats[activeChatId] = { title: text.substring(0,25).toUpperCase(), messages: [], sysSent: false };
+            }
+
+            const currentChat = chats[activeChatId];
+            isUserScrolling = false;
+
+            let finalMsg = text;
+            if(config.systemPrompt && !currentChat.sysSent) {
+                finalMsg = config.systemPrompt + "\n\n" + text;
+                currentChat.sysSent = true;
+            }
+
+            displayMessage(text, 'user-message', false);
+            currentChat.messages.push({text: text, type:'user-message'});
+            
+            if(currentChat.title === "YENİ SOHBET") {
+                currentChat.title = text.substring(0,25).toUpperCase();
+                renderChatList();
+            }
+
+            input.value = ''; 
+            input.style.height = '48px';
+            
+            const thinking = document.getElementById('thinking');
+            thinking.style.display = 'flex';
+            screen.appendChild(thinking);
+            screen.scrollTop = screen.scrollHeight;
+
+            await fetchAI(finalMsg, activeChatId);
+            saveAll(); 
+        }
+
+        async function fetchAI(query, chatId) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" })
+                });
+                const data = await response.json();
                 document.getElementById('thinking').style.display = 'none';
-                if(data.response) {
+
+                if(data.response && chats[chatId]) {
                     let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim();
-                    displayMessage(clean, 'khoj-message', true);
-                    // Kaydederken doğru ID'ye kaydettiğimizden emin oluyoruz
-                    if(chats[activeChatId]) {
-                        chats[activeChatId].messages.push({text: clean, type:'khoj-message'});
+                    // Sadece hala o sohbetteysek ekrana bas
+                    if(chatId === activeChatId) {
+                        displayMessage(clean, 'khoj-message', true);
                     }
+                    chats[chatId].messages.push({text: clean, type:'khoj-message'});
+                    saveAll();
                 }
             } catch(e) { 
                 document.getElementById('thinking').style.display = 'none';
-                displayMessage("BAĞLANTI HATASI!", 'khoj-message', false);
+                if(chatId === activeChatId) displayMessage("BAĞLANTI HATASI!", 'khoj-message', false);
             }
         }
 
@@ -278,6 +389,7 @@
             screen.appendChild(d);
             if(animate) {
                 let i = 0; 
+                d.textContent = "";
                 function typeWriter() { 
                     if(i < text.length) { 
                         d.textContent += text.charAt(i++); 
@@ -295,17 +407,14 @@
         function renderChatList() {
             const list = document.getElementById('chat-list');
             list.innerHTML = '';
-            const sortedIds = Object.keys(chats).sort((a,b) => {
-                const timeA = parseInt(a.split('_')[1]);
-                const timeB = parseInt(b.split('_')[1]);
-                return timeB - timeA;
-            });
+            const sortedIds = Object.keys(chats).sort((a,b) => b.split('_')[1] - a.split('_')[1]);
 
             sortedIds.forEach(id => {
                 const item = document.createElement('div');
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 item.innerText = chats[id].title;
-                item.onmousedown = item.ontouchstart = (e) => {
+                
+                item.ontouchstart = (e) => {
                     pressTimer = setTimeout(() => {
                         selectedChatId = id;
                         document.getElementById('edit-chat-name').value = chats[id].title;
@@ -313,13 +422,15 @@
                         if(navigator.vibrate) navigator.vibrate(50);
                     }, 600);
                 };
-                item.onmouseup = item.ontouchend = () => clearTimeout(pressTimer);
+                item.ontouchend = () => clearTimeout(pressTimer);
+
                 item.onclick = () => { 
+                    if(activeChatId === id) { closeSidebar(); return; }
                     activeChatId = id; 
                     saveAll(); 
                     loadActiveChat(); 
                     closeSidebar(); 
-                    renderChatList(); // Listeyi yenileyip turuncu noktayı koy
+                    renderChatList();
                 };
                 list.appendChild(item);
             });
@@ -337,8 +448,11 @@
             if(Object.keys(chats).length <= 1) return alert("SON SOHBETİ SİLEMEZSİN");
             if(confirm("BU SOHBET KALICI OLARAK SİLİNECEK?")) {
                 delete chats[selectedChatId];
-                if(activeChatId === selectedChatId) activeChatId = Object.keys(chats)[0];
-                saveAll(); renderChatList(); loadActiveChat(); closeModals();
+                if(activeChatId === selectedChatId) {
+                    activeChatId = Object.keys(chats)[0];
+                    loadActiveChat();
+                }
+                saveAll(); renderChatList(); closeModals();
             }
         }
 
@@ -373,5 +487,6 @@
         document.getElementById('user-input').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
 
     </script>
+
 </body>
 </html>
