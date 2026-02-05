@@ -216,7 +216,15 @@
         async function handleSend() {
             const input = document.getElementById('user-input');
             let text = input.value.trim();
-            if(!text || !activeChatId) return;
+            
+            // Burayı sağlamlaştırdık abi
+            if(!text) return;
+            if(!activeChatId || !chats[activeChatId]) {
+                const id = 'chat_' + Date.now();
+                chats[id] = { title: text.substring(0,25).toUpperCase(), messages: [], sysSent: false };
+                activeChatId = id;
+            }
+
             isUserScrolling = false;
 
             let finalMsg = text;
@@ -253,7 +261,10 @@
                 if(data.response) {
                     let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim();
                     displayMessage(clean, 'khoj-message', true);
-                    chats[activeChatId].messages.push({text: clean, type:'khoj-message'});
+                    // Kaydederken doğru ID'ye kaydettiğimizden emin oluyoruz
+                    if(chats[activeChatId]) {
+                        chats[activeChatId].messages.push({text: clean, type:'khoj-message'});
+                    }
                 }
             } catch(e) { 
                 document.getElementById('thinking').style.display = 'none';
@@ -284,7 +295,12 @@
         function renderChatList() {
             const list = document.getElementById('chat-list');
             list.innerHTML = '';
-            const sortedIds = Object.keys(chats).sort((a,b) => b.split('_')[1] - a.split('_')[1]);
+            const sortedIds = Object.keys(chats).sort((a,b) => {
+                const timeA = parseInt(a.split('_')[1]);
+                const timeB = parseInt(b.split('_')[1]);
+                return timeB - timeA;
+            });
+
             sortedIds.forEach(id => {
                 const item = document.createElement('div');
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
@@ -303,7 +319,7 @@
                     saveAll(); 
                     loadActiveChat(); 
                     closeSidebar(); 
-                    renderChatList();
+                    renderChatList(); // Listeyi yenileyip turuncu noktayı koy
                 };
                 list.appendChild(item);
             });
@@ -311,7 +327,7 @@
 
         function saveChatName() {
             const newName = document.getElementById('edit-chat-name').value.trim().toUpperCase();
-            if(newName) {
+            if(newName && chats[selectedChatId]) {
                 chats[selectedChatId].title = newName;
                 saveAll(); renderChatList(); closeModals();
             }
