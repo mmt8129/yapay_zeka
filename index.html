@@ -7,6 +7,7 @@
     
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    
     <link rel="apple-touch-icon" href="icon.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -51,7 +52,7 @@
         .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; margin-left: 5%; }
         .khoj-message { align-self: flex-start; background: transparent; border: 2px solid var(--khoj-border); color: var(--text-color); border-bottom-left-radius: 4px; margin-right: 5%; margin-left: 10%; }
 
-        .input-wrapper { position: fixed; bottom: 0; width: 100%; background: var(--bg-color); border-top: 1px solid rgba(128,128,128,0.2); padding: 15px 15px calc(15px + env(safe-area-inset-bottom)); z-index: 100; }
+.input-wrapper { position: fixed; bottom: 0; width: 100%; background: var(--bg-color); border-top: 1px solid rgba(128,128,128,0.2); padding: 15px 15px calc(15px + env(safe-area-inset-bottom)); z-index: 100; }
         .input-container { display: flex; align-items: flex-end; gap: 10px; max-width: 800px; margin: 0 auto; }
         #user-input { flex: 1; background: var(--input-bg); border: 1px solid #ccc; border-radius: 20px; padding: 12px 18px; color: #000; font-size: 16px; min-height: 48px; max-height: 150px; resize: none; }
         .send-btn { font-size: 40px; color: var(--accent); cursor: pointer; }
@@ -103,7 +104,8 @@
     <div id="chat-screen"></div>
 
     <div id="thinking" class="typing-dots">
-        <div class="dot" style="animation-delay: 0.0s"></div>
+
+<div class="dot" style="animation-delay: 0.0s"></div>
         <div class="dot" style="animation-delay: 0.5s"></div>
         <div class="dot" style="animation-delay: 1.0s"></div>
         <div class="dot" style="animation-delay: 1.5s"></div>
@@ -165,15 +167,13 @@
 
         function updateClock() {
             const now = new Date();
-            const clock = document.getElementById('live-clock');
-            if(clock) clock.innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('live-clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
         }
         setInterval(updateClock, 1000); updateClock();
 
         window.onload = () => {
             applyConfig();
-            // Eğer chats boşsa veya activeChatId geçersizse temizle ve yeni aç
-            if (Object.keys(chats).length === 0 || !activeChatId || !chats[activeChatId]) {
+            if (!activeChatId || !chats[activeChatId]) {
                 createNewChat();
             } else { 
                 renderChatList(); 
@@ -188,7 +188,7 @@
             else isUserScrolling = false;
         });
 
-        function openSidebar() { document.getElementById('sidebar-overlay').style.display = 'block'; document.getElementById('sidebar').classList.add('active'); }
+function openSidebar() { document.getElementById('sidebar-overlay').style.display = 'block'; document.getElementById('sidebar').classList.add('active'); }
         function closeSidebar() { document.getElementById('sidebar-overlay').style.display = 'none'; document.getElementById('sidebar').classList.remove('active'); }
         function openSettings() { closeSidebar(); document.getElementById('settings-modal').style.display = 'flex'; }
         
@@ -212,87 +212,74 @@
             screen.innerHTML = '';
             chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false));
             screen.scrollTop = screen.scrollHeight;
-            isUserScrolling = false;
         }
 
         async function handleSend() {
             const input = document.getElementById('user-input');
             let text = input.value.trim();
             
+            // Burayı sağlamlaştırdık abi
             if(!text) return;
-
-            // Güvenlik: Eğer bir şekilde activeChatId bozulmuşsa düzelt
             if(!activeChatId || !chats[activeChatId]) {
-                activeChatId = 'chat_' + Date.now();
-                chats[activeChatId] = { title: "YENİ SOHBET", messages: [], sysSent: false };
+                const id = 'chat_' + Date.now();
+                chats[id] = { title: text.substring(0,25).toUpperCase(), messages: [], sysSent: false };
+                activeChatId = id;
             }
 
-            const currentChatId = activeChatId; 
             isUserScrolling = false;
 
             let finalMsg = text;
-            if(config.systemPrompt && !chats[currentChatId].sysSent) {
+            if(config.systemPrompt && !chats[activeChatId].sysSent) {
                 finalMsg = config.systemPrompt + "\n\n" + text;
-                chats[currentChatId].sysSent = true;
+                chats[activeChatId].sysSent = true;
             }
 
             displayMessage(text, 'user-message', false);
-            chats[currentChatId].messages.push({text: text, type:'user-message'});
-            
-            if(chats[currentChatId].title === "YENİ SOHBET") {
-                chats[currentChatId].title = text.substring(0,25).toUpperCase();
-                renderChatList();
-            }
+            chats[activeChatId].messages.push({text: text, type:'user-message'});
+            if(chats[activeChatId].title === "YENİ SOHBET") chats[activeChatId].title = text.substring(0,25).toUpperCase();
 
-            input.value = ''; 
-            input.style.height = '48px';
+            input.value = ''; input.style.height = '48px';
             
             const thinking = document.getElementById('thinking');
             thinking.style.display = 'flex';
             screen.appendChild(thinking);
             screen.scrollTop = screen.scrollHeight;
 
-            await fetchAI(finalMsg, currentChatId);
+            await fetchAI(finalMsg);
             saveAll(); 
+            renderChatList();
         }
 
-        async function fetchAI(query, chatId) {
+        async function fetchAI(query) {
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': Bearer ${API_KEY}, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" })
                 });
                 const data = await response.json();
-                
-                const thinking = document.getElementById('thinking');
-                if(thinking) thinking.style.display = 'none';
-
-                if(data.response && chats[chatId]) {
+                document.getElementById('thinking').style.display = 'none';
+                if(data.response) {
                     let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim();
-                    
-                    chats[chatId].messages.push({text: clean, type:'khoj-message'});
-                    
-                    // Sadece hala o sohbetteysek ekrana yazdır
-                    if(chatId === activeChatId) {
-                        displayMessage(clean, 'khoj-message', true);
+                    displayMessage(clean, 'khoj-message', true);
+                    // Kaydederken doğru ID'ye kaydettiğimizden emin oluyoruz
+                    if(chats[activeChatId]) {
+                        chats[activeChatId].messages.push({text: clean, type:'khoj-message'});
                     }
-                    saveAll();
                 }
             } catch(e) { 
                 document.getElementById('thinking').style.display = 'none';
-                if(chatId === activeChatId) displayMessage("BAĞLANTI HATASI!", 'khoj-message', false);
+                displayMessage("BAĞLANTI HATASI!", 'khoj-message', false);
             }
         }
 
         function displayMessage(text, type, animate) {
-            const d = document.createElement('div');
-            d.className = `message ${type}`;
+
+const d = document.createElement('div');
+            d.className = message ${type};
             screen.appendChild(d);
-            
             if(animate) {
                 let i = 0; 
-                d.textContent = "";
                 function typeWriter() { 
                     if(i < text.length) { 
                         d.textContent += text.charAt(i++); 
@@ -309,21 +296,18 @@
 
         function renderChatList() {
             const list = document.getElementById('chat-list');
-            if(!list) return;
             list.innerHTML = '';
-            
             const sortedIds = Object.keys(chats).sort((a,b) => {
-                const timeA = parseInt(a.split('_')[1]) || 0;
-                const timeB = parseInt(b.split('_')[1]) || 0;
+                const timeA = parseInt(a.split('_')[1]);
+                const timeB = parseInt(b.split('_')[1]);
                 return timeB - timeA;
             });
 
             sortedIds.forEach(id => {
                 const item = document.createElement('div');
-                item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
-                item.innerText = chats[id].title || "SOHBET";
-                
-                item.ontouchstart = (e) => {
+                item.className = chat-item ${id === activeChatId ? 'active' : ''};
+                item.innerText = chats[id].title;
+                item.onmousedown = item.ontouchstart = (e) => {
                     pressTimer = setTimeout(() => {
                         selectedChatId = id;
                         document.getElementById('edit-chat-name').value = chats[id].title;
@@ -331,15 +315,13 @@
                         if(navigator.vibrate) navigator.vibrate(50);
                     }, 600);
                 };
-                item.ontouchend = () => clearTimeout(pressTimer);
-
+                item.onmouseup = item.ontouchend = () => clearTimeout(pressTimer);
                 item.onclick = () => { 
-                    if(activeChatId === id) { closeSidebar(); return; }
                     activeChatId = id; 
                     saveAll(); 
                     loadActiveChat(); 
                     closeSidebar(); 
-                    renderChatList();
+                    renderChatList(); // Listeyi yenileyip turuncu noktayı koy
                 };
                 list.appendChild(item);
             });
@@ -354,17 +336,11 @@
         }
 
         function deleteChat() {
-            if(Object.keys(chats).length <= 1) {
-                alert("SON SOHBETİ SİLEMEZSİN");
-                return;
-            }
+            if(Object.keys(chats).length <= 1) return alert("SON SOHBETİ SİLEMEZSİN");
             if(confirm("BU SOHBET KALICI OLARAK SİLİNECEK?")) {
                 delete chats[selectedChatId];
-                if(activeChatId === selectedChatId) {
-                    activeChatId = Object.keys(chats)[0];
-                    loadActiveChat();
-                }
-                saveAll(); renderChatList(); closeModals();
+                if(activeChatId === selectedChatId) activeChatId = Object.keys(chats)[0];
+                saveAll(); renderChatList(); loadActiveChat(); closeModals();
             }
         }
 
@@ -377,22 +353,17 @@
         function updateTheme(val) { config.theme = val; applyConfig(); }
 
         function applyConfig() {
-            const fVal = document.getElementById('font-val');
-            const sVal = document.getElementById('speed-val');
-            if(fVal) fVal.innerText = config.font;
-            if(sVal) sVal.innerText = config.speed;
-            
+            document.getElementById('font-val').innerText = config.font;
+            document.getElementById('speed-val').innerText = config.speed;
             const sp = document.getElementById('system-prompt');
             if(sp) sp.value = config.systemPrompt || '';
-            
             document.documentElement.style.setProperty('--font-size', config.font + 'px');
             document.body.setAttribute('data-theme', config.theme);
-            
             const ts = document.getElementById('theme-select');
             if(ts) ts.value = config.theme;
         }
 
-        function saveAll() {
+function saveAll() {
             const sp = document.getElementById('system-prompt');
             if(sp) config.systemPrompt = sp.value;
             localStorage.setItem('khoj_chats', JSON.stringify(chats));
@@ -400,17 +371,8 @@
             localStorage.setItem('khoj_config', JSON.stringify(config));
         }
 
-        function confirmClearAll() { 
-            if(confirm("HER ŞEY SİLİNSİN Mİ?")) { 
-                localStorage.clear(); 
-                location.reload(); 
-            } 
-        }
-        
-        document.getElementById('user-input').addEventListener('input', function() { 
-            this.style.height = 'auto'; 
-            this.style.height = (this.scrollHeight) + 'px'; 
-        });
+        function confirmClearAll() { if(confirm("HER ŞEY SİLİNSİN Mİ?")) { localStorage.clear(); location.reload(); } }
+        document.getElementById('user-input').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
 
     </script>
 </body>
