@@ -80,7 +80,7 @@
 
     <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
     <div id="sidebar" class="sidebar">
-        <div class="sidebar-section" onclick="openSettings()">AYARLAR ⚙️</div>
+        <div class="sidebar-section" onclick="openSettings()">AYARLAR </div>
         <div class="sidebar-section" onclick="createNewChat()">YENİ SOHBET ＋</div>
         <div id="chat-list" class="chat-list-container"></div>
     </div>
@@ -92,9 +92,9 @@
                 <label style="font-size:11px; font-weight:900">YENİ İSİM</label>
                 <textarea id="edit-chat-name" rows="1"></textarea>
             </div>
-            <button class="btn btn-orange" onclick="saveChatName()">İSMİ GÜNCELLE ✏️</button>
-            <button class="btn btn-danger" onclick="deleteChat()">SOHBETİ SİL 🗑️</button>
-            <button class="btn btn-gray" onclick="closeModals()">VAZGEÇ</button>
+            <button class="btn btn-orange" onclick="saveChatName()">Yeniden Adlandır</button>
+            <button class="btn btn-danger" onclick="deleteChat()">Sil </button>
+            <button class="btn btn-gray" onclick="closeModals()">Vazgeç</button>
         </div>
     </div>
 
@@ -112,7 +112,7 @@
         <div class="modal-box">
             <h3 style="margin-top:0; color:var(--accent); text-align:center; font-weight: 900;">AYARLAR</h3>
             <div class="setting-item">
-                <label style="font-size:11px; font-weight:900">SİSTEM TALİMATI</label>
+                <label style="font-size:11px; font-weight:900">Hafıza İçin Buraya Bilgi Gir</label>
                 <textarea id="system-prompt" rows="2"></textarea>
             </div>
             <div class="setting-item">
@@ -123,6 +123,13 @@
                 </select>
             </div>
             <div class="setting-item">
+    <label style="font-size:11px; font-weight:900">BAĞLANTI KÖPRÜSÜ (PROXY)</label>
+    <select id="proxy-select" onchange="updateProxy(this.value)">
+        <option value="heroku">HEROKUAPP (İzin Gerekir)</option>
+        <option value="io">CORSPROXY.IO (Hızlı/Doğrudan)</option>
+    </select>
+</div>
+            <div class="setting-item">
                 <label style="font-size:11px; font-weight:900">YAZI BOYUTU</label>
                 <div class="modern-controls">
                     <button class="btn-ctrl" onclick="adjustConfig('font', -1)">-</button>
@@ -131,22 +138,36 @@
                 </div>
             </div>
             <div class="setting-item">
-                <label style="font-size:11px; font-weight:900">YAZIM HIZI</label>
+                <label style="font-size:11px; font-weight:900">Cevap Hızı</label>
                 <div class="modern-controls">
                     <button class="btn-ctrl" onclick="adjustConfig('speed', -5)">-</button>
                     <div class="ctrl-val"><span id="speed-val">20</span>MS</div>
                     <button class="btn-ctrl" onclick="adjustConfig('speed', 5)">+</button>
                 </div>
             </div>
-            <button class="btn btn-orange" onclick="window.open('https://cors-anywhere.herokuapp.com/corsdemo')">CORS İZNİ AL 🔑</button>
-            <button class="btn btn-danger" onclick="confirmClearAll()">SİSTEMİ SIFIRLA</button>
+            <button id="cors-btn" class="btn btn-orange" onclick="window.open('https://cors-anywhere.herokuapp.com/corsdemo')">CORS Seçimi 🔑</button>
+            <button class="btn btn-danger" onclick="confirmClearAll()">Tüm Sohbet ve Hafızayı Sil</button>
             <button class="btn btn-gray" onclick="closeModals()">KAPAT</button>
         </div>
     </div>
 
     <script>
-        const API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
         const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
+        let currentProxy = localStorage.getItem('khoj_proxy') || 'heroku';
+        let API_URL = "";
+
+        function updateProxy(val) {
+            currentProxy = val;
+            localStorage.setItem('khoj_proxy', val);
+            const corsBtn = document.getElementById('cors-btn');
+            if(val === 'heroku') {
+                API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
+                if(corsBtn) corsBtn.style.display = 'block';
+            } else {
+                API_URL = 'https://corsproxy.io/?https://app.khoj.dev/api/chat';
+                if(corsBtn) corsBtn.style.display = 'none';
+            }
+        }
 
         let chats = JSON.parse(localStorage.getItem('khoj_chats')) || {};
         let activeChatId = localStorage.getItem('khoj_active_id');
@@ -160,8 +181,15 @@
         }
         setInterval(updateClock, 1000); updateClock();
 
-        window.onload = () => {
+      window.onload = () => {
             applyConfig();
+            
+            // PROXY AYARINI BURAYA EKLE ABİ
+            updateProxy(currentProxy);
+            if(document.getElementById('proxy-select')) {
+                document.getElementById('proxy-select').value = currentProxy;
+            }
+
             if (!activeChatId || !chats[activeChatId]) createNewChat();
             else { renderChatList(); loadActiveChat(); }
         };
@@ -286,7 +314,7 @@
         }
 
         function deleteChat() {
-            if(Object.keys(chats).length <= 1) return alert("SON SOHBETİ SİLEMEZSİN ABİ!");
+            if(Object.keys(chats).length <= 1) return alert("SON SOHBETİ SİLEMEZSİN");
             if(confirm("BU SOHBET KALICI OLARAK SİLİNECEK?")) {
                 delete chats[selectedChatId];
                 if(activeChatId === selectedChatId) activeChatId = Object.keys(chats)[0];
