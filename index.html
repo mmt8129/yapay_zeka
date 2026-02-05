@@ -197,15 +197,14 @@
             saveAll(); 
         }
 
-        function createNewChat() {
+                function createNewChat() {
             const id = 'chat_' + Date.now();
             chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false };
             activeChatId = id;
             saveAll(); 
-            renderChatList(); 
-            loadActiveChat(); 
-            closeSidebar();
+            location.reload(); // Sistemi canlandırmak için sayfayı yeniler ⚡
         }
+
 
         function loadActiveChat() {
             if (!activeChatId || !chats[activeChatId]) return;
@@ -334,16 +333,12 @@
                 item.ontouchend = () => clearTimeout(pressTimer);
 
                 item.onclick = () => { 
-                    if(activeChatId === id) { closeSidebar(); return; }
-                    activeChatId = id; 
-                    saveAll(); 
-                    loadActiveChat(); 
-                    closeSidebar(); 
-                    renderChatList();
-                };
-                list.appendChild(item);
-            });
-        }
+    if(activeChatId === id) { closeSidebar(); return; }
+    activeChatId = id; 
+    saveAll(); 
+    location.reload(); 
+};
+
 
         function saveChatName() {
             const newName = document.getElementById('edit-chat-name').value.trim().toUpperCase();
