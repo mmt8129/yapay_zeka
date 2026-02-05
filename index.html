@@ -164,21 +164,8 @@
 
     <script>
         const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
-        let currentProxy = localStorage.getItem('khoj_proxy') || 'heroku';
-        let API_URL = "";
-
-        function updateProxy(val) {
-            currentProxy = val;
-            localStorage.setItem('khoj_proxy', val);
-            const corsBtn = document.getElementById('cors-btn');
-            if(val === 'heroku') {
-                API_URL = 'https://cors-anywhere.herokuapp.com/https://app.khoj.dev/api/chat';
-                if(corsBtn) corsBtn.style.display = 'block';
-            } else {
-                API_URL = 'https://corsproxy.io/?https://app.khoj.dev/api/chat';
-                if(corsBtn) corsBtn.style.display = 'none';
-            }
-        }
+let API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
+function updateProxy(val) { /* Boş bıraktık hata vermesin diye */ }
 
         let chats = JSON.parse(localStorage.getItem('khoj_chats')) || {};
         let activeChatId = localStorage.getItem('khoj_active_id');
