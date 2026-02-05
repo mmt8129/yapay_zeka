@@ -114,7 +114,7 @@
     <div class="input-wrapper">
         <div class="input-container">
             <textarea id="user-input" rows="1" placeholder="Buraya yaz abi..."></textarea>
-            <div class="send-btn" id="send-btn-main" onclick="handleSend()">➤</div>
+            <div class="send-btn" onclick="handleSend()">➤</div>
         </div>
     </div>
 
@@ -197,14 +197,15 @@
             saveAll(); 
         }
 
-                function createNewChat() {
+        function createNewChat() {
             const id = 'chat_' + Date.now();
             chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false };
             activeChatId = id;
             saveAll(); 
-            location.reload(); // Sistemi canlandırmak için sayfayı yeniler ⚡
+            renderChatList(); 
+            loadActiveChat(); 
+            closeSidebar();
         }
-
 
         function loadActiveChat() {
             if (!activeChatId || !chats[activeChatId]) return;
@@ -333,12 +334,16 @@
                 item.ontouchend = () => clearTimeout(pressTimer);
 
                 item.onclick = () => { 
-    if(activeChatId === id) { closeSidebar(); return; }
-    activeChatId = id; 
-    saveAll(); 
-    location.reload(); 
-};
-
+                    if(activeChatId === id) { closeSidebar(); return; }
+                    activeChatId = id; 
+                    saveAll(); 
+                    loadActiveChat(); 
+                    closeSidebar(); 
+                    renderChatList();
+                };
+                list.appendChild(item);
+            });
+        }
 
         function saveChatName() {
             const newName = document.getElementById('edit-chat-name').value.trim().toUpperCase();
@@ -406,14 +411,7 @@
             this.style.height = 'auto'; 
             this.style.height = (this.scrollHeight) + 'px'; 
         });
-// Butonun her zaman aktif kalmasını garanti edelim abi
-document.getElementById('user-input').onkeydown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleSend();
-    }
-};
-        
+
     </script>
 </body>
 </html>
