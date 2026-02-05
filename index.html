@@ -43,8 +43,9 @@
         
         .sidebar-section { border: 2px solid var(--accent); border-radius: 15px; padding: 12px; margin-bottom: 15px; cursor: pointer; text-align: center; font-weight: 900; color: var(--accent); font-size: 14px; text-transform: uppercase; }
         .chat-list-container { height: calc(100% - 150px); overflow-y: auto; margin-top: 5px; border: 1.5px solid var(--accent); border-radius: 15px; padding: 10px; background: rgba(128,128,128,0.1); }
-        .chat-item { padding: 12px; border-radius: 10px; margin-bottom: 8px; background: rgba(128,128,128,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; color: var(--accent); font-weight: 900; text-transform: uppercase; user-select: none; -webkit-user-select: none; }
+        .chat-item { position: relative; padding: 12px 12px 12px 25px; border-radius: 10px; margin-bottom: 8px; background: rgba(128,128,128,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; color: var(--accent); font-weight: 900; text-transform: uppercase; }
         .chat-item.active { border-color: var(--accent); background: rgba(255, 75, 43, 0.2); }
+        .chat-item.active::before { content: ""; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
 
         #chat-screen { height: 100%; overflow-y: auto; padding: 80px 15px 160px; display: flex; flex-direction: column; }
         .message { margin-bottom: 20px; padding: 15px 18px; border-radius: 20px; max-width: 95%; line-height: 1.6; font-size: var(--font-size); word-wrap: break-word; white-space: pre-wrap; }
@@ -189,7 +190,12 @@
         function openSidebar() { document.getElementById('sidebar-overlay').style.display = 'block'; document.getElementById('sidebar').classList.add('active'); }
         function closeSidebar() { document.getElementById('sidebar-overlay').style.display = 'none'; document.getElementById('sidebar').classList.remove('active'); }
         function openSettings() { closeSidebar(); document.getElementById('settings-modal').style.display = 'flex'; }
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); saveAll(); }
+        
+        function closeModals() { 
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); 
+            saveAll(); 
+            loadActiveChat(); // Ayarlardan sonra sistemi canlandır
+        }
 
         function createNewChat() {
             const id = 'chat_' + Date.now();
@@ -213,7 +219,7 @@
         async function handleSend() {
             const input = document.getElementById('user-input');
             let text = input.value.trim();
-            if(!text) return;
+            if(!text || !activeChatId) return;
             isUserScrolling = false;
 
             let finalMsg = text;
@@ -294,7 +300,12 @@
                     }, 600);
                 };
                 item.onmouseup = item.ontouchend = () => clearTimeout(pressTimer);
-                item.onclick = () => { activeChatId = id; saveAll(); loadActiveChat(); closeSidebar(); };
+                item.onclick = () => { 
+                    activeChatId = id; 
+                    saveAll(); 
+                    loadActiveChat(); 
+                    closeSidebar(); 
+                };
                 list.appendChild(item);
             });
         }
@@ -327,14 +338,19 @@
         function applyConfig() {
             document.getElementById('font-val').innerText = config.font;
             document.getElementById('speed-val').innerText = config.speed;
-            document.getElementById('system-prompt').value = config.systemPrompt || '';
+            if(document.getElementById('system-prompt')) {
+                document.getElementById('system-prompt').value = config.systemPrompt || '';
+            }
             document.documentElement.style.setProperty('--font-size', config.font + 'px');
             document.body.setAttribute('data-theme', config.theme);
-            document.getElementById('theme-select').value = config.theme;
+            if(document.getElementById('theme-select')) {
+                document.getElementById('theme-select').value = config.theme;
+            }
         }
 
         function saveAll() {
-            config.systemPrompt = document.getElementById('system-prompt').value;
+            const sp = document.getElementById('system-prompt');
+            if(sp) config.systemPrompt = sp.value;
             localStorage.setItem('khoj_chats', JSON.stringify(chats));
             localStorage.setItem('khoj_active_id', activeChatId);
             localStorage.setItem('khoj_config', JSON.stringify(config));
