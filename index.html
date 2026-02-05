@@ -43,7 +43,7 @@
         
         .sidebar-section { border: 2px solid var(--accent); border-radius: 15px; padding: 12px; margin-bottom: 15px; cursor: pointer; text-align: center; font-weight: 900; color: var(--accent); font-size: 14px; text-transform: uppercase; }
         .chat-list-container { height: calc(100% - 150px); overflow-y: auto; margin-top: 5px; border: 1.5px solid var(--accent); border-radius: 15px; padding: 10px; background: rgba(128,128,128,0.1); }
-        .chat-item { position: relative; padding: 12px 12px 12px 25px; border-radius: 10px; margin-bottom: 8px; background: rgba(128,128,128,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; color: var(--accent); font-weight: 900; text-transform: uppercase; }
+        .chat-item { position: relative; padding: 12px 12px 12px 25px; border-radius: 10px; margin-bottom: 8px; background: rgba(128,128,128,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; color: var(--accent); font-weight: 900; text-transform: uppercase; cursor: pointer; }
         .chat-item.active { border-color: var(--accent); background: rgba(255, 75, 43, 0.2); }
         .chat-item.active::before { content: ""; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
 
@@ -194,7 +194,6 @@
         function closeModals() { 
             document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); 
             saveAll(); 
-            loadActiveChat(); // Ayarlardan sonra sistemi canlandır
         }
 
         function createNewChat() {
@@ -208,12 +207,10 @@
         }
 
         function loadActiveChat() {
+            if (!activeChatId || !chats[activeChatId]) return;
             screen.innerHTML = '';
-            if (chats[activeChatId]) {
-                chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false));
-            }
+            chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false));
             screen.scrollTop = screen.scrollHeight;
-            renderChatList();
         }
 
         async function handleSend() {
@@ -287,7 +284,8 @@
         function renderChatList() {
             const list = document.getElementById('chat-list');
             list.innerHTML = '';
-            Object.keys(chats).sort((a,b) => b.split('_')[1] - a.split('_')[1]).forEach(id => {
+            const sortedIds = Object.keys(chats).sort((a,b) => b.split('_')[1] - a.split('_')[1]);
+            sortedIds.forEach(id => {
                 const item = document.createElement('div');
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 item.innerText = chats[id].title;
@@ -305,6 +303,7 @@
                     saveAll(); 
                     loadActiveChat(); 
                     closeSidebar(); 
+                    renderChatList();
                 };
                 list.appendChild(item);
             });
@@ -338,14 +337,12 @@
         function applyConfig() {
             document.getElementById('font-val').innerText = config.font;
             document.getElementById('speed-val').innerText = config.speed;
-            if(document.getElementById('system-prompt')) {
-                document.getElementById('system-prompt').value = config.systemPrompt || '';
-            }
+            const sp = document.getElementById('system-prompt');
+            if(sp) sp.value = config.systemPrompt || '';
             document.documentElement.style.setProperty('--font-size', config.font + 'px');
             document.body.setAttribute('data-theme', config.theme);
-            if(document.getElementById('theme-select')) {
-                document.getElementById('theme-select').value = config.theme;
-            }
+            const ts = document.getElementById('theme-select');
+            if(ts) ts.value = config.theme;
         }
 
         function saveAll() {
