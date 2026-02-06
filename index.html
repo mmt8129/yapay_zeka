@@ -26,7 +26,7 @@
         #chat-screen { height: 100%; overflow-y: auto; padding: 80px 15px 180px; display: flex; flex-direction: column; }
         .message { margin-bottom: 20px; padding: 15px 18px; border-radius: 20px; max-width: 95%; line-height: 1.6; font-size: var(--font-size); word-wrap: break-word; white-space: pre-wrap; }
         .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; margin-left: 5%; }
-        .khoj-message { align-self: flex-start; background: transparent; border: 2px solid var(--khoj-border); color: var(--text-color); border-bottom-left-radius: 4px; margin-right: 2%; margin-left: 8%; }
+        .khoj-message { align-self: flex-start; background: transparent; border: 2px solid var(--khoj-border); color: var(--text-color); border-bottom-left-radius: 4px; margin-right: 2%; margin-left: 5%; }
         .input-wrapper { position: fixed; bottom: 0; width: 100%; background: var(--bg-color); border-top: 1px solid rgba(128,128,128,0.2); padding: 10px 15px calc(15px + env(safe-area-inset-bottom)); z-index: 100; }
         .input-container { display: flex; align-items: flex-end; gap: 10px; max-width: 800px; margin: 0 auto; }
         #user-input { flex: 1; background: var(--input-bg); border: 1px solid #ccc; border-radius: 20px; padding: 12px 18px; color: #000; font-size: 16px; min-height: 48px; max-height: 150px; resize: none; }
@@ -93,10 +93,10 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, get, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBqlA4yrw0rJZQyR3t6daJKru28EkmWhe4",
             authDomain: "khoj-smart.firebaseapp.com",
@@ -107,44 +107,39 @@
             appId: "1:603123756358:web:16ec68ba2872ae0436c947"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        // Değişkenler
         const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
         const API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
-        let chats = {};
-        let activeChatId = null;
+        let chats = {}, activeChatId = null, lastUserMsg = "", pressTimer, selectedChatId, isLongPress = false;
         let config = { speed: 20, font: 14, theme: 'dark', systemPrompt: '' };
-        let lastUserMsg = "", pressTimer, selectedChatId, isLongPress = false;
         const screen = document.getElementById('chat-screen');
 
-        // Buluttan Veri Çekme
         async function initApp() {
-            const snapshot = await get(ref(db, 'khoj_data'));
-            const data = snapshot.val();
-            if (data) {
-                chats = data.chats || {};
-                config = data.config || config;
-                activeChatId = data.activeChatId || null;
-            }
-            applyConfig();
-            if (Object.keys(chats).length === 0 || !activeChatId || !chats[activeChatId]) {
-                window.createNewChat();
-            } else {
-                renderChatList();
-                loadActiveChat();
-            }
+            db.ref('khoj_data').once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    chats = data.chats || {};
+                    config = data.config || config;
+                    activeChatId = data.activeChatId || null;
+                }
+                applyConfig();
+                if (Object.keys(chats).length === 0 || !activeChatId || !chats[activeChatId]) {
+                    window.createNewChat();
+                } else {
+                    renderChatList();
+                    loadActiveChat();
+                }
+            });
         }
 
-        // Buluta Kaydetme
         function saveAll() {
             const sp = document.getElementById('system-prompt');
             if(sp) config.systemPrompt = sp.value;
-            set(ref(db, 'khoj_data'), { chats, config, activeChatId });
+            db.ref('khoj_data').set({ chats, config, activeChatId });
         }
 
-        // Global Fonksiyonlar
         window.openSidebar = () => { document.getElementById('sidebar-overlay').style.display = 'block'; document.getElementById('sidebar').classList.add('active'); };
         window.closeSidebar = () => { document.getElementById('sidebar-overlay').style.display = 'none'; document.getElementById('sidebar').classList.remove('active'); };
         window.openSettings = () => { window.closeSidebar(); document.getElementById('settings-modal').style.display = 'flex'; };
@@ -153,8 +148,8 @@
         window.createNewChat = () => { const id = 'chat_' + Date.now(); chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false }; activeChatId = id; saveAll(); location.reload(); };
         window.loadActiveChat = () => { if (!activeChatId || !chats[activeChatId]) return; screen.innerHTML = ''; chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false)); screen.scrollTop = screen.scrollHeight; };
 
-        window.handleSend = async () => { const input = document.getElementById('user-input'); let text = input.value.trim(); if(!text) return; lastUserMsg = text; await processMsg(text); input.value = ''; input.style.height = '48px'; };
-        window.retryLastMessage = async () => { if(!lastUserMsg) return; await processMsg(lastUserMsg); };
+        window.handleSend = async () => { const input = document.getElementById('user-input'); let text = input.value.trim(); if(!text) return; lastUserMsg = text; input.value = ''; input.style.height = '48px'; await processMsg(text); };
+        window.retryLastMessage = async () => { if(lastUserMsg) await processMsg(lastUserMsg); };
 
         async function processMsg(text) {
             if(!activeChatId || !chats[activeChatId]) return;
@@ -205,7 +200,7 @@
         }
 
         window.saveChatName = () => { const newName = document.getElementById('edit-chat-name').value.trim().toUpperCase(); if(newName) { chats[selectedChatId].title = newName; saveAll(); location.reload(); } };
-        window.deleteChat = () => { if(confirm("SİLİNSİN Mİ?")) { delete chats[selectedChatId]; activeChatId = Object.keys(chats)[0]; saveAll(); location.reload(); } };
+        window.deleteChat = () => { if(confirm("SİLİNSİN Mİ?")) { delete chats[selectedChatId]; activeChatId = Object.keys(chats)[0] || null; saveAll(); location.reload(); } };
         window.adjustConfig = (type, val) => { if(type === 'speed') config.speed = Math.max(0, config.speed + val); if(type === 'font') config.font = Math.max(10, config.font + val); applyConfig(); };
         window.updateTheme = (val) => { config.theme = val; applyConfig(); };
         function applyConfig() { 
@@ -214,7 +209,7 @@
             document.documentElement.style.setProperty('--font-size', config.font + 'px');
             document.body.setAttribute('data-theme', config.theme);
         }
-        window.confirmClearAll = () => { if(confirm("HER ŞEY SİLİNSİN Mİ?")) remove(ref(db, 'khoj_data')).then(() => location.reload()); };
+        window.confirmClearAll = () => { if(confirm("HER ŞEY SİLİNSİN Mİ?")) db.ref('khoj_data').remove().then(() => location.reload()); };
         
         function updateClock() { const now = new Date(); document.getElementById('live-clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0'); }
         setInterval(updateClock, 1000); updateClock();
