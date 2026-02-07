@@ -47,6 +47,7 @@
         .btn-gray { background: #666; color: white; }
         select, textarea { width: 100%; padding: 12px; border-radius: 12px; background: rgba(128,128,128,0.1); border: 1px solid #444; color: var(--text-color); font-family: inherit; margin-top: 5px; }
     </style>
+<base target="_blank">
 </head>
 <body data-theme="dark">
     <div class="menu-btn" onclick="openSidebar()">☰</div>
@@ -93,99 +94,215 @@
         </div>
     </div>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script>
         const firebaseConfig = {
-    apiKey: "AIzaSyBqlA4yrw0rJZQyR3t6daJKru28EkmWhe4",
-    authDomain: "khoj-smart.firebaseapp.com",
-    databaseURL: "https://khoj-smart-default-rtdb.firebaseio.com",
-    projectId: "khoj-smart",
-    storageBucket: "khoj-smart.firebasestorage.app",
-    messagingSenderId: "603123756358",
-    appId: "1:603123756358:web:16ec68ba2872ae0436c947"
-};
+            apiKey: "AIzaSyBqlA4yrw0rJZQyR3t6daJKru28EkmWhe4",
+            authDomain: "khoj-smart.firebaseapp.com",
+            databaseURL: "https://khoj-smart-default-rtdb.firebaseio.com",
+            projectId: "khoj-smart",
+            storageBucket: "khoj-smart.firebasestorage.app",
+            messagingSenderId: "603123756358",
+            appId: "1:603123756358:web:16ec68ba2872ae0436c947"
+        };
 
-// Firebase'i çalıştıran komut
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.database();
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
         const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
         const API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
-        let chats = JSON.parse(localStorage.getItem('khoj_chats')) || {};
-        let activeChatId = localStorage.getItem('khoj_active_id');
-        let config = JSON.parse(localStorage.getItem('khoj_config')) || { speed: 20, font: 14, theme: 'dark', systemPrompt: '' };
+        
+        let chats = {};
+        let activeChatId = null;
+        let config = { speed: 20, font: 14, theme: 'dark', systemPrompt: '' };
         let lastUserMsg = "", pressTimer, selectedChatId, isLongPress = false;
+        let isFirebaseReady = false;
 
-        function updateClock() { const now = new Date(); const clock = document.getElementById('live-clock'); if(clock) clock.innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0'); }
-        setInterval(updateClock, 1000); updateClock();
+        function updateClock() { 
+            const now = new Date(); 
+            const clock = document.getElementById('live-clock'); 
+            if(clock) clock.innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0'); 
+        }
+        setInterval(updateClock, 1000); 
+        updateClock();
 
-        window.onload = () => {
-    db.ref('khoj_data').once('value').then((snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            chats = data.chats || {};
-            config = data.config || config;
-            activeChatId = data.activeChatId || null;
-        }
-        applyConfig();
-        if (Object.keys(chats).length === 0 || !activeChatId || !chats[activeChatId]) {
-            createNewChat();
-        } else {
-            renderChatList();
-            loadActiveChat();
-        }
-    });
-};
+        // DÜZELTME: Firebase'den veri çekme async/await ile ve hata yönetimi ile
+        window.onload = async () => {
+            try {
+                const snapshot = await db.ref('khoj_data').once('value');
+                const data = snapshot.val();
+                if (data) {
+                    chats = data.chats || {};
+                    config = data.config || config;
+                    activeChatId = data.activeChatId || null;
+                }
+                isFirebaseReady = true;
+            } catch (error) {
+                console.error("Firebase hatası:", error);
+                // Fallback: localStorage'dan yükle
+                chats = JSON.parse(localStorage.getItem('khoj_chats')) || {};
+                config = JSON.parse(localStorage.getItem('khoj_config')) || config;
+                activeChatId = localStorage.getItem('khoj_active_id');
+            }
+            
+            applyConfig();
+            if (Object.keys(chats).length === 0 || !activeChatId || !chats[activeChatId]) {
+                await createNewChat();
+            } else {
+                renderChatList();
+                loadActiveChat();
+            }
+        };
+
         const screen = document.getElementById('chat-screen');
         let isUserScrolling = false;
         screen.addEventListener('touchstart', () => { isUserScrolling = true; });
-        screen.addEventListener('scroll', () => { if (screen.scrollTop + screen.clientHeight < screen.scrollHeight - 50) isUserScrolling = true; else isUserScrolling = false; });
+        screen.addEventListener('scroll', () => { 
+            if (screen.scrollTop + screen.clientHeight < screen.scrollHeight - 50) isUserScrolling = true; 
+            else isUserScrolling = false; 
+        });
 
-        function openSidebar() { document.getElementById('sidebar-overlay').style.display = 'block'; document.getElementById('sidebar').classList.add('active'); }
-        function closeSidebar() { document.getElementById('sidebar-overlay').style.display = 'none'; document.getElementById('sidebar').classList.remove('active'); }
-        function openSettings() { closeSidebar(); document.getElementById('settings-modal').style.display = 'flex'; }
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); saveAll(); }
-
-        function createNewChat() { const id = 'chat_' + Date.now(); chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false }; activeChatId = id; saveAll(); location.reload(); }
-        function loadActiveChat() { if (!activeChatId || !chats[activeChatId]) return; screen.innerHTML = ''; chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false)); screen.scrollTop = screen.scrollHeight; isUserScrolling = false; }
-
-        async function handleSend() { const input = document.getElementById('user-input'); let text = input.value.trim(); if(!text) return; lastUserMsg = text; await processMsg(text); input.value = ''; input.style.height = '48px'; }
-        async function retryLastMessage() { if(!lastUserMsg) { alert("HENÜZ MESAJ ATMADIN ABİ"); return; } await processMsg(lastUserMsg); }
-
-        async function processMsg(text) {
-            if(!activeChatId || !chats[activeChatId]) return;
-            const currentChatId = activeChatId; let finalMsg = text;
-            if(config.systemPrompt && !chats[currentChatId].sysSent) { finalMsg = config.systemPrompt + "\n\n" + text; chats[currentChatId].sysSent = true; }
-            displayMessage(text, 'user-message', false); chats[currentChatId].messages.push({text: text, type:'user-message'});
-            if(chats[currentChatId].title === "YENİ SOHBET") chats[currentChatId].title = text.substring(0,25).toUpperCase();
-            const thinking = document.getElementById('thinking'); thinking.style.display = 'flex'; screen.appendChild(thinking); screen.scrollTop = screen.scrollHeight;
-            await fetchAI(finalMsg, currentChatId); saveAll();
+        function openSidebar() { 
+            document.getElementById('sidebar-overlay').style.display = 'block'; 
+            document.getElementById('sidebar').classList.add('active'); 
+        }
+        function closeSidebar() { 
+            document.getElementById('sidebar-overlay').style.display = 'none'; 
+            document.getElementById('sidebar').classList.remove('active'); 
+        }
+        function openSettings() { 
+            closeSidebar(); 
+            document.getElementById('settings-modal').style.display = 'flex'; 
+        }
+        async function closeModals() { 
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); 
+            await saveAll(); 
         }
 
+        // DÜZELTME: createNewChat async oldu
+        async function createNewChat() { 
+            const id = 'chat_' + Date.now(); 
+            chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false }; 
+            activeChatId = id; 
+            await saveAll(); 
+            location.reload(); 
+        }
+
+        function loadActiveChat() { 
+            if (!activeChatId || !chats[activeChatId]) return; 
+            screen.innerHTML = ''; 
+            chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false)); 
+            screen.scrollTop = screen.scrollHeight; 
+            isUserScrolling = false; 
+        }
+
+        async function handleSend() { 
+            const input = document.getElementById('user-input'); 
+            let text = input.value.trim(); 
+            if(!text) return; 
+            lastUserMsg = text; 
+            await processMsg(text); 
+            input.value = ''; 
+            input.style.height = '48px'; 
+        }
+
+        async function retryLastMessage() { 
+            if(!lastUserMsg) { 
+                alert("HENÜZ MESAJ ATMADIN ABİ"); 
+                return; 
+            } 
+            await processMsg(lastUserMsg); 
+        }
+
+        // DÜZELTME: processMsg async ve await'ler düzgün
+        async function processMsg(text) {
+            if(!activeChatId || !chats[activeChatId]) return;
+            const currentChatId = activeChatId; 
+            let finalMsg = text;
+            
+            if(config.systemPrompt && !chats[currentChatId].sysSent) { 
+                finalMsg = config.systemPrompt + "\n\n" + text; 
+                chats[currentChatId].sysSent = true; 
+            }
+            
+            displayMessage(text, 'user-message', false); 
+            chats[currentChatId].messages.push({text: text, type:'user-message'});
+            
+            if(chats[currentChatId].title === "YENİ SOHBET") 
+                chats[currentChatId].title = text.substring(0,25).toUpperCase();
+            
+            const thinking = document.getElementById('thinking'); 
+            thinking.style.display = 'flex'; 
+            screen.appendChild(thinking); 
+            screen.scrollTop = screen.scrollHeight;
+            
+            // DÜZELTME: fetchAI ve saveAll await ile çağrıldı
+            await fetchAI(finalMsg, currentChatId); 
+            await saveAll();
+        }
+
+        // DÜZELTME: fetchAI async ve saveAll await ile
         async function fetchAI(query, chatId) {
             try {
-                const response = await fetch(API_URL, { method: 'POST', headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" }) });
-                const data = await response.json(); document.getElementById('thinking').style.display = 'none';
-                if(data.response && chats[chatId]) { let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim(); chats[chatId].messages.push({text: clean, type:'khoj-message'}); if(chatId === activeChatId) displayMessage(clean, 'khoj-message', true); saveAll(); }
-            } catch(e) { document.getElementById('thinking').style.display = 'none'; if(chatId === activeChatId) displayMessage("BAĞLANTI HATASI!", 'khoj-message', false); }
+                const response = await fetch(API_URL, { 
+                    method: 'POST', 
+                    headers: { 
+                        'Authorization': `Bearer ${API_KEY}`, 
+                        'Content-Type': 'application/json' 
+                    }, 
+                    body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" }) 
+                });
+                const data = await response.json(); 
+                document.getElementById('thinking').style.display = 'none';
+                
+                if(data.response && chats[chatId]) { 
+                    let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim(); 
+                    chats[chatId].messages.push({text: clean, type:'khoj-message'}); 
+                    if(chatId === activeChatId) displayMessage(clean, 'khoj-message', true); 
+                    await saveAll(); // DÜZELTME: await eklendi
+                }
+            } catch(e) { 
+                document.getElementById('thinking').style.display = 'none'; 
+                if(chatId === activeChatId) displayMessage("BAĞLANTI HATASI!", 'khoj-message', false); 
+            }
         }
 
         function displayMessage(text, type, animate) {
-            const d = document.createElement('div'); d.className = `message ${type}`; screen.appendChild(d);
-            if(animate) { let i = 0; d.textContent = ""; function typeWriter() { if(i < text.length) { d.textContent += text.charAt(i++); if(!isUserScrolling) screen.scrollTop = screen.scrollHeight; setTimeout(typeWriter, config.speed); } } typeWriter(); }
-            else { d.textContent = text; screen.scrollTop = screen.scrollHeight; }
+            const d = document.createElement('div'); 
+            d.className = `message ${type}`; 
+            screen.appendChild(d);
+            
+            if(animate) { 
+                let i = 0; 
+                d.textContent = ""; 
+                function typeWriter() { 
+                    if(i < text.length) { 
+                        d.textContent += text.charAt(i++); 
+                        if(!isUserScrolling) screen.scrollTop = screen.scrollHeight; 
+                        setTimeout(typeWriter, config.speed); 
+                    } 
+                } 
+                typeWriter(); 
+            } else { 
+                d.textContent = text; 
+                screen.scrollTop = screen.scrollHeight; 
+            }
         }
 
         function renderChatList() {
-            const list = document.getElementById('chat-list'); if(!list) return; list.innerHTML = '';
+            const list = document.getElementById('chat-list'); 
+            if(!list) return; 
+            list.innerHTML = '';
+            
             const sortedIds = Object.keys(chats).sort((a,b) => (parseInt(b.split('_')[1]) || 0) - (parseInt(a.split('_')[1]) || 0));
+            
             sortedIds.forEach(id => {
                 const item = document.createElement('div');
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 item.innerText = chats[id].title || "SOHBET";
                 
-                // ABİ: Basılı tutma düzeltildi (Mobil ve Masaüstü)
                 item.onmousedown = item.ontouchstart = (e) => {
                     isLongPress = false;
                     pressTimer = setTimeout(() => {
@@ -200,32 +317,101 @@ const db = firebase.database();
                 
                 item.onclick = () => { 
                     if(isLongPress) return;
-                    if(activeChatId === id) { closeSidebar(); return; } 
-                    activeChatId = id; saveAll(); location.reload(); 
+                    if(activeChatId === id) { 
+                        closeSidebar(); 
+                        return; 
+                    } 
+                    activeChatId = id; 
+                    saveAll().then(() => location.reload()); // DÜZELTME: async saveAll
                 };
                 list.appendChild(item);
             });
         }
 
-        function saveChatName() { const newName = document.getElementById('edit-chat-name').value.trim().toUpperCase(); if(newName && chats[selectedChatId]) { chats[selectedChatId].title = newName; saveAll(); location.reload(); } }
-        function deleteChat() { if(Object.keys(chats).length <= 1) { alert("SON SOHBETİ SİLEMEZSİN"); return; } if(confirm("SİLİNSİN Mİ?")) { delete chats[selectedChatId]; if(activeChatId === selectedChatId) activeChatId = Object.keys(chats)[0]; saveAll(); location.reload(); } }
-        function adjustConfig(type, val) { if(type === 'speed') config.speed = Math.max(0, config.speed + val); if(type === 'font') config.font = Math.max(10, config.font + val); applyConfig(); }
-        function updateTheme(val) { config.theme = val; applyConfig(); }
-        function applyConfig() { const fVal = document.getElementById('font-val'), sVal = document.getElementById('speed-val'); if(fVal) fVal.innerText = config.font; if(sVal) sVal.innerText = config.speed; const sp = document.getElementById('system-prompt'); if(sp) sp.value = config.systemPrompt || ''; document.documentElement.style.setProperty('--font-size', config.font + 'px'); document.body.setAttribute('data-theme', config.theme); }
-        function saveAll() {
-    const sp = document.getElementById('system-prompt');
-    if(sp) config.systemPrompt = sp.value;
-    // Buluta kaydetme komutu:
-    db.ref('khoj_data').set({ chats, config, activeChatId });
-}
-        function confirmClearAll() {
-    if(confirm("HER ŞEY SİLİNSİN Mİ?")) {
-        db.ref('khoj_data').remove().then(() => {
-            location.reload();
+        // DÜZELTME: saveChatName async oldu
+        async function saveChatName() { 
+            const newName = document.getElementById('edit-chat-name').value.trim().toUpperCase(); 
+            if(newName && chats[selectedChatId]) { 
+                chats[selectedChatId].title = newName; 
+                await saveAll(); // DÜZELTME: await eklendi
+                location.reload(); 
+            } 
+        }
+
+        // DÜZELTME: deleteChat async oldu
+        async function deleteChat() { 
+            if(Object.keys(chats).length <= 1) { 
+                alert("SON SOHBETİ SİLEMEZSİN"); 
+                return; 
+            } 
+            if(confirm("SİLİNSİN Mİ?")) { 
+                delete chats[selectedChatId]; 
+                if(activeChatId === selectedChatId) activeChatId = Object.keys(chats)[0]; 
+                await saveAll(); // DÜZELTME: await eklendi
+                location.reload(); 
+            } 
+        }
+
+        async function adjustConfig(type, val) { 
+            if(type === 'speed') config.speed = Math.max(0, config.speed + val); 
+            if(type === 'font') config.font = Math.max(10, config.font + val); 
+            applyConfig(); 
+            await saveAll(); // DÜZELTME: await eklendi
+        }
+
+        async function updateTheme(val) { 
+            config.theme = val; 
+            applyConfig(); 
+            await saveAll(); // DÜZELTME: await eklendi
+        }
+
+        function applyConfig() { 
+            const fVal = document.getElementById('font-val'), sVal = document.getElementById('speed-val'); 
+            if(fVal) fVal.innerText = config.font; 
+            if(sVal) sVal.innerText = config.speed; 
+            const sp = document.getElementById('system-prompt'); 
+            if(sp) sp.value = config.systemPrompt || ''; 
+            document.documentElement.style.setProperty('--font-size', config.font + 'px'); 
+            document.body.setAttribute('data-theme', config.theme); 
+        }
+
+        // DÜZELTME: saveAll async oldu ve try-catch eklendi
+        async function saveAll() {
+            const sp = document.getElementById('system-prompt');
+            if(sp) config.systemPrompt = sp.value;
+            
+            // LocalStorage'a her zaman kaydet (yedek için)
+            localStorage.setItem('khoj_chats', JSON.stringify(chats));
+            localStorage.setItem('khoj_active_id', activeChatId);
+            localStorage.setItem('khoj_config', JSON.stringify(config));
+            
+            // Firebase'e kaydet (eğer hazırsa)
+            if (isFirebaseReady) {
+                try {
+                    await db.ref('khoj_data').set({ chats, config, activeChatId });
+                } catch (error) {
+                    console.error("Firebase kaydetme hatası:", error);
+                }
+            }
+        }
+
+        async function confirmClearAll() { 
+            if(confirm("HER ŞEY SİLİNSİN Mİ?")) { 
+                try {
+                    await db.ref('khoj_data').remove();
+                    localStorage.clear();
+                    location.reload();
+                } catch (error) {
+                    console.error("Silme hatası:", error);
+                    alert("SİLME İŞLEMİNDE HATA OLUŞTU");
+                }
+            } 
+        }
+
+        document.getElementById('user-input').addEventListener('input', function() { 
+            this.style.height = 'auto'; 
+            this.style.height = (this.scrollHeight) + 'px'; 
         });
-    }
-}
-        document.getElementById('user-input').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
     </script>
 </body>
 </html>
