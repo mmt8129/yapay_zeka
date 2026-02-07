@@ -109,10 +109,13 @@
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
+        
 const db = firebase.database();
-        const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
-        const API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
-        let chats = {};
+const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
+const API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
+
+// ABİ BURASI ÖNEMLİ: localStorage kısımlarını tamamen temizledik
+let chats = {};
 let activeChatId = null;
 let config = { speed: 20, font: 14, theme: 'dark', systemPrompt: '' };
 let lastUserMsg = "", pressTimer, selectedChatId, isLongPress = false;
