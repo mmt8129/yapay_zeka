@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-10">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Khoj Smart Pro</title>
     <link rel="manifest" href="manifest.json">
@@ -49,11 +49,11 @@
     </style>
 </head>
 <body data-theme="dark">
-    <div class="menu-btn" onclick="openSidebar()">☰</div>
+    <div class="menu-btn" onclick="openSidebar()">?</div>
     <div class="clock-panel" id="live-clock">00:00</div>
     <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
     <div id="sidebar" class="sidebar">
-        <div class="sidebar-section" onclick="openSettings()">AYARLAR ⚙️</div>
+        <div class="sidebar-section" onclick="openSettings()">AYARLAR ??</div>
         <div class="sidebar-section" onclick="createNewChat()">YENİ SOHBET +</div>
         <div id="chat-list" class="chat-list-container"></div>
     </div>
@@ -62,7 +62,7 @@
             <h3 style="margin-top:0; color:var(--accent); text-align:center; font-weight: 900;">SOHBETİ DÜZENLE</h3>
             <div class="setting-item"><label style="font-size:11px; font-weight:900">YENİ İSİM</label><textarea id="edit-chat-name" rows="1"></textarea></div>
             <button class="btn btn-orange" onclick="saveChatName()">Yeniden Adlandır</button>
-            <button class="btn btn-danger" onclick="deleteChat()">Sil 🗑️</button>
+            <button class="btn btn-danger" onclick="deleteChat()">Sil ???</button>
             <button class="btn btn-gray" onclick="closeModals()">Vazgeç</button>
         </div>
     </div>
@@ -75,10 +75,10 @@
     <div class="input-wrapper">
         <div class="input-container">
             <textarea id="user-input" rows="1" placeholder="Buraya yaz abi..."></textarea>
-            <div class="send-btn" onclick="handleSend()">➤</div>
+            <div class="send-btn" onclick="handleSend()">?</div>
         </div>
         <div class="retry-container">
-            <div class="retry-btn" onclick="retryLastMessage()">Son Mesajı Tekrar Gönder ↩</div>
+            <div class="retry-btn" onclick="retryLastMessage()">Son Mesajı Tekrar Gönder ?</div>
         </div>
     </div>
     <div id="settings-modal" class="modal-overlay">
