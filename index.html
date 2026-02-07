@@ -151,18 +151,24 @@ let lastUserMsg = "", pressTimer, selectedChatId, isLongPress = false;
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); saveAll(); }
 
         function createNewChat() { const id = 'chat_' + Date.now(); chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false }; activeChatId = id; saveAll(); location.reload(); }
-        function loadActiveChat() { if (!activeChatId || !chats[activeChatId]) return; screen.innerHTML = ''; chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false)); screen.scrollTop = screen.scrollHeight; isUserScrolling = false; }
-
+        function loadActiveChat() { 
+    if (!activeChatId || !chats[activeChatId]) return; 
+    screen.innerHTML = ''; 
+    // ABİ BURAYA DİKKAT: .messages'dan sonra || [] ekledik
+    (chats[activeChatId].messages || []).forEach(m => displayMessage(m.text, m.type, false)); 
+    screen.scrollTop = screen.scrollHeight; 
+    isUserScrolling = false; 
+}
         async function handleSend() { const input = document.getElementById('user-input'); let text = input.value.trim(); if(!text) return; lastUserMsg = text; await processMsg(text); input.value = ''; input.style.height = '48px'; }
         async function retryLastMessage() { if(!lastUserMsg) { alert("HENÜZ MESAJ ATMADIN ABİ"); return; } await processMsg(lastUserMsg); }
 
-        async function processMsg(text) {
-    // ABİ BURAYA DİKKAT: Veriler henüz buluttan gelmediyse işlemi durdur
-    if(!chats || !activeChatId || !chats[activeChatId]) {
-        alert("ABİ VERİLER BULUTTAN HENÜZ GELMEDİ, BİRAZ BEKLE VEYA YENİ SOHBET AÇ");
-        return;
+  async function processMsg(text) {
+    if(!activeChatId || !chats[activeChatId]) {
+        // Eğer o an sohbet objesi yoksa hemen oluşturuyoruz
+        if(!activeChatId) activeChatId = 'chat_' + Date.now();
+        if(!chats[activeChatId]) chats[activeChatId] = { title: "YENİ SOHBET", messages: [], sysSent: false };
     }
-
+    
     const currentChatId = activeChatId; 
     let finalMsg = text;
 
@@ -172,20 +178,20 @@ let lastUserMsg = "", pressTimer, selectedChatId, isLongPress = false;
     }
 
     displayMessage(text, 'user-message', false); 
+    
+    // Mesajlar listesi yoksa oluştur ve push et
+    if(!chats[currentChatId].messages) chats[currentChatId].messages = [];
     chats[currentChatId].messages.push({text: text, type:'user-message'});
 
-    if(chats[currentChatId].title === "YENİ SOHBET") {
-        chats[currentChatId].title = text.substring(0,25).toUpperCase();
-    }
-
+    if(chats[currentChatId].title === "YENİ SOHBET") chats[currentChatId].title = text.substring(0,25).toUpperCase();
+    
     const thinking = document.getElementById('thinking'); 
     thinking.style.display = 'flex'; 
     screen.appendChild(thinking); 
     screen.scrollTop = screen.scrollHeight;
 
-    // API'YE GÖNDERME İŞLEMİ
     await fetchAI(finalMsg, currentChatId); 
-    saveAll(); // Buluta yedekle
+    saveAll(); 
 }
 
         async function fetchAI(query, chatId) {
