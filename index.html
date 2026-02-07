@@ -26,7 +26,7 @@
         #chat-screen { height: 100%; overflow-y: auto; padding: 80px 15px 180px; display: flex; flex-direction: column; }
         .message { margin-bottom: 20px; padding: 15px 18px; border-radius: 20px; max-width: 95%; line-height: 1.6; font-size: var(--font-size); word-wrap: break-word; white-space: pre-wrap; }
         .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; margin-left: 5%; }
-        .khoj-message { align-self: flex-start; background: transparent; border: 2px solid var(--khoj-border); color: var(--text-color); border-bottom-left-radius: 4px; margin-right: 2%; margin-left: 10%; }
+        .khoj-message { align-self: flex-start; background: transparent; border: 2px solid var(--khoj-border); color: var(--text-color); border-bottom-left-radius: 4px; margin-right: 2%; margin-left: 5%; }
         .input-wrapper { position: fixed; bottom: 0; width: 100%; background: var(--bg-color); border-top: 1px solid rgba(128,128,128,0.2); padding: 10px 15px calc(15px + env(safe-area-inset-bottom)); z-index: 100; }
         .input-container { display: flex; align-items: flex-end; gap: 10px; max-width: 800px; margin: 0 auto; }
         #user-input { flex: 1; background: var(--input-bg); border: 1px solid #ccc; border-radius: 20px; padding: 12px 18px; color: #000; font-size: 16px; min-height: 48px; max-height: 150px; resize: none; }
@@ -54,16 +54,16 @@
     <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
     <div id="sidebar" class="sidebar">
         <div class="sidebar-section" onclick="openSettings()">AYARLAR ??</div>
-        <div class="sidebar-section" onclick="createNewChat()">YEN� SOHBET +</div>
+        <div class="sidebar-section" onclick="createNewChat()">YENİ SOHBET +</div>
         <div id="chat-list" class="chat-list-container"></div>
     </div>
     <div id="edit-modal" class="modal-overlay">
         <div class="modal-box">
-            <h3 style="margin-top:0; color:var(--accent); text-align:center; font-weight: 900;">SOHBET� D�ZENLE</h3>
-            <div class="setting-item"><label style="font-size:11px; font-weight:900">YEN� �S�M</label><textarea id="edit-chat-name" rows="1"></textarea></div>
-            <button class="btn btn-orange" onclick="saveChatName()">Yeniden Adland�r</button>
+            <h3 style="margin-top:0; color:var(--accent); text-align:center; font-weight: 900;">SOHBETİ DÜZENLE</h3>
+            <div class="setting-item"><label style="font-size:11px; font-weight:900">YENİ İSİM</label><textarea id="edit-chat-name" rows="1"></textarea></div>
+            <button class="btn btn-orange" onclick="saveChatName()">Yeniden Adlandır</button>
             <button class="btn btn-danger" onclick="deleteChat()">Sil ???</button>
-            <button class="btn btn-gray" onclick="closeModals()">Vazge�</button>
+            <button class="btn btn-gray" onclick="closeModals()">Vazgeç</button>
         </div>
     </div>
     <div id="chat-screen"></div>
@@ -78,17 +78,17 @@
             <div class="send-btn" onclick="handleSend()">?</div>
         </div>
         <div class="retry-container">
-            <div class="retry-btn" onclick="retryLastMessage()">Son Mesaj� Tekrar G�nder ?</div>
+            <div class="retry-btn" onclick="retryLastMessage()">Son Mesajı Tekrar Gönder ?</div>
         </div>
     </div>
     <div id="settings-modal" class="modal-overlay">
         <div class="modal-box">
             <h3 style="margin-top:0; color:var(--accent); text-align:center; font-weight: 900;">AYARLAR</h3>
-            <div class="setting-item"><label style="font-size:11px; font-weight:900">Haf�za ��in Buraya Bilgi Gir</label><textarea id="system-prompt" rows="2"></textarea></div>
-            <div class="setting-item"><label style="font-size:11px; font-weight:900">TEMA SE��M�</label><select id="theme-select" onchange="updateTheme(this.value)"><option value="dark">KARANLIK (S�YAH)</option><option value="white">AYDINLIK (BEYAZ)</option></select></div>
+            <div class="setting-item"><label style="font-size:11px; font-weight:900">Hafıza İçin Buraya Bilgi Gir</label><textarea id="system-prompt" rows="2"></textarea></div>
+            <div class="setting-item"><label style="font-size:11px; font-weight:900">TEMA SEÇİMİ</label><select id="theme-select" onchange="updateTheme(this.value)"><option value="dark">KARANLIK (SİYAH)</option><option value="white">AYDINLIK (BEYAZ)</option></select></div>
             <div class="setting-item"><label style="font-size:11px; font-weight:900">YAZI BOYUTU</label><div class="modern-controls"><button class="btn-ctrl" onclick="adjustConfig('font', -1)">-</button><div class="ctrl-val"><span id="font-val">14</span>PX</div><button class="btn-ctrl" onclick="adjustConfig('font', 1)">+</button></div></div>
             <div class="setting-item"><label style="font-size:11px; font-weight:900">CEVAP HIZI</label><div class="modern-controls"><button class="btn-ctrl" onclick="adjustConfig('speed', -5)">-</button><div class="ctrl-val"><span id="speed-val">20</span>MS</div><button class="btn-ctrl" onclick="adjustConfig('speed', 5)">+</button></div></div>
-            <button class="btn btn-danger" onclick="confirmClearAll()">T�m Sohbet ve Haf�zay� Sil</button>
+            <button class="btn btn-danger" onclick="confirmClearAll()">Tüm Sohbet ve Hafızayı Sil</button>
             <button class="btn btn-gray" onclick="closeModals()">KAPAT</button>
         </div>
     </div>
@@ -105,7 +105,7 @@
     appId: "1:603123756358:web:16ec68ba2872ae0436c947"
 };
 
-// Firebase'i �al��t�ran komut
+// Firebase'i çalıştıran komut
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
@@ -147,18 +147,18 @@ const db = firebase.database();
         function openSettings() { closeSidebar(); document.getElementById('settings-modal').style.display = 'flex'; }
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); saveAll(); }
 
-        function createNewChat() { const id = 'chat_' + Date.now(); chats[id] = { title: "YEN� SOHBET", messages: [], sysSent: false }; activeChatId = id; saveAll(); location.reload(); }
+        function createNewChat() { const id = 'chat_' + Date.now(); chats[id] = { title: "YENİ SOHBET", messages: [], sysSent: false }; activeChatId = id; saveAll(); location.reload(); }
         function loadActiveChat() { if (!activeChatId || !chats[activeChatId]) return; screen.innerHTML = ''; chats[activeChatId].messages.forEach(m => displayMessage(m.text, m.type, false)); screen.scrollTop = screen.scrollHeight; isUserScrolling = false; }
 
         async function handleSend() { const input = document.getElementById('user-input'); let text = input.value.trim(); if(!text) return; lastUserMsg = text; await processMsg(text); input.value = ''; input.style.height = '48px'; }
-        async function retryLastMessage() { if(!lastUserMsg) { alert("HEN�Z MESAJ ATMADIN AB�"); return; } await processMsg(lastUserMsg); }
+        async function retryLastMessage() { if(!lastUserMsg) { alert("HENÜZ MESAJ ATMADIN ABİ"); return; } await processMsg(lastUserMsg); }
 
         async function processMsg(text) {
             if(!activeChatId || !chats[activeChatId]) return;
             const currentChatId = activeChatId; let finalMsg = text;
             if(config.systemPrompt && !chats[currentChatId].sysSent) { finalMsg = config.systemPrompt + "\n\n" + text; chats[currentChatId].sysSent = true; }
             displayMessage(text, 'user-message', false); chats[currentChatId].messages.push({text: text, type:'user-message'});
-            if(chats[currentChatId].title === "YEN� SOHBET") chats[currentChatId].title = text.substring(0,25).toUpperCase();
+            if(chats[currentChatId].title === "YENİ SOHBET") chats[currentChatId].title = text.substring(0,25).toUpperCase();
             const thinking = document.getElementById('thinking'); thinking.style.display = 'flex'; screen.appendChild(thinking); screen.scrollTop = screen.scrollHeight;
             await fetchAI(finalMsg, currentChatId); saveAll();
         }
@@ -168,7 +168,7 @@ const db = firebase.database();
                 const response = await fetch(API_URL, { method: 'POST', headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" }) });
                 const data = await response.json(); document.getElementById('thinking').style.display = 'none';
                 if(data.response && chats[chatId]) { let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim(); chats[chatId].messages.push({text: clean, type:'khoj-message'}); if(chatId === activeChatId) displayMessage(clean, 'khoj-message', true); saveAll(); }
-            } catch(e) { document.getElementById('thinking').style.display = 'none'; if(chatId === activeChatId) displayMessage("BA�LANTI HATASI!", 'khoj-message', false); }
+            } catch(e) { document.getElementById('thinking').style.display = 'none'; if(chatId === activeChatId) displayMessage("BAĞLANTI HATASI!", 'khoj-message', false); }
         }
 
         function displayMessage(text, type, animate) {
@@ -185,7 +185,7 @@ const db = firebase.database();
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 item.innerText = chats[id].title || "SOHBET";
                 
-                // AB�: Bas�l� tutma d�zeltildi (Mobil ve Masa�st�)
+                // ABİ: Basılı tutma düzeltildi (Mobil ve Masaüstü)
                 item.onmousedown = item.ontouchstart = (e) => {
                     isLongPress = false;
                     pressTimer = setTimeout(() => {
@@ -208,7 +208,7 @@ const db = firebase.database();
         }
 
         function saveChatName() { const newName = document.getElementById('edit-chat-name').value.trim().toUpperCase(); if(newName && chats[selectedChatId]) { chats[selectedChatId].title = newName; saveAll(); location.reload(); } }
-        function deleteChat() { if(Object.keys(chats).length <= 1) { alert("SON SOHBET� S�LEMEZS�N"); return; } if(confirm("S�L�NS�N M�?")) { delete chats[selectedChatId]; if(activeChatId === selectedChatId) activeChatId = Object.keys(chats)[0]; saveAll(); location.reload(); } }
+        function deleteChat() { if(Object.keys(chats).length <= 1) { alert("SON SOHBETİ SİLEMEZSİN"); return; } if(confirm("SİLİNSİN Mİ?")) { delete chats[selectedChatId]; if(activeChatId === selectedChatId) activeChatId = Object.keys(chats)[0]; saveAll(); location.reload(); } }
         function adjustConfig(type, val) { if(type === 'speed') config.speed = Math.max(0, config.speed + val); if(type === 'font') config.font = Math.max(10, config.font + val); applyConfig(); }
         function updateTheme(val) { config.theme = val; applyConfig(); }
         function applyConfig() { const fVal = document.getElementById('font-val'), sVal = document.getElementById('speed-val'); if(fVal) fVal.innerText = config.font; if(sVal) sVal.innerText = config.speed; const sp = document.getElementById('system-prompt'); if(sp) sp.value = config.systemPrompt || ''; document.documentElement.style.setProperty('--font-size', config.font + 'px'); document.body.setAttribute('data-theme', config.theme); }
@@ -219,7 +219,7 @@ function saveAll() {
     db.ref('khoj_data').set({ chats, config, activeChatId });
 }
        function confirmClearAll() {
-    if(confirm("HER �EY S�L�NS�N M�?")) {
+    if(confirm("HER ŞEY SİLİNSİN Mİ?")) {
         db.ref('khoj_data').remove().then(() => {
             location.reload();
         });
