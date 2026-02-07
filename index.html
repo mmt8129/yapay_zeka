@@ -157,14 +157,36 @@ let lastUserMsg = "", pressTimer, selectedChatId, isLongPress = false;
         async function retryLastMessage() { if(!lastUserMsg) { alert("HENÜZ MESAJ ATMADIN ABİ"); return; } await processMsg(lastUserMsg); }
 
         async function processMsg(text) {
-            if(!activeChatId || !chats[activeChatId]) return;
-            const currentChatId = activeChatId; let finalMsg = text;
-            if(config.systemPrompt && !chats[currentChatId].sysSent) { finalMsg = config.systemPrompt + "\n\n" + text; chats[currentChatId].sysSent = true; }
-            displayMessage(text, 'user-message', false); chats[currentChatId].messages.push({text: text, type:'user-message'});
-            if(chats[currentChatId].title === "YENİ SOHBET") chats[currentChatId].title = text.substring(0,25).toUpperCase();
-            const thinking = document.getElementById('thinking'); thinking.style.display = 'flex'; screen.appendChild(thinking); screen.scrollTop = screen.scrollHeight;
-            await fetchAI(finalMsg, currentChatId); saveAll();
-        }
+    // ABİ BURAYA DİKKAT: Veriler henüz buluttan gelmediyse işlemi durdur
+    if(!chats || !activeChatId || !chats[activeChatId]) {
+        alert("ABİ VERİLER BULUTTAN HENÜZ GELMEDİ, BİRAZ BEKLE VEYA YENİ SOHBET AÇ");
+        return;
+    }
+
+    const currentChatId = activeChatId; 
+    let finalMsg = text;
+
+    if(config.systemPrompt && !chats[currentChatId].sysSent) { 
+        finalMsg = config.systemPrompt + "\n\n" + text; 
+        chats[currentChatId].sysSent = true; 
+    }
+
+    displayMessage(text, 'user-message', false); 
+    chats[currentChatId].messages.push({text: text, type:'user-message'});
+
+    if(chats[currentChatId].title === "YENİ SOHBET") {
+        chats[currentChatId].title = text.substring(0,25).toUpperCase();
+    }
+
+    const thinking = document.getElementById('thinking'); 
+    thinking.style.display = 'flex'; 
+    screen.appendChild(thinking); 
+    screen.scrollTop = screen.scrollHeight;
+
+    // API'YE GÖNDERME İŞLEMİ
+    await fetchAI(finalMsg, currentChatId); 
+    saveAll(); // Buluta yedekle
+}
 
         async function fetchAI(query, chatId) {
             try {
