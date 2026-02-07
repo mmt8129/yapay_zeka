@@ -189,12 +189,37 @@ let lastUserMsg = "", pressTimer, selectedChatId, isLongPress = false;
 }
 
         async function fetchAI(query, chatId) {
-            try {
-                const response = await fetch(API_URL, { method: 'POST', headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ q: query, stream: false, n: 1, client: "web" }) });
-                const data = await response.json(); document.getElementById('thinking').style.display = 'none';
-                if(data.response && chats[chatId]) { let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim(); chats[chatId].messages.push({text: clean, type:'khoj-message'}); if(chatId === activeChatId) displayMessage(clean, 'khoj-message', true); saveAll(); }
-            } catch(e) { document.getElementById('thinking').style.display = 'none'; if(chatId === activeChatId) displayMessage("BAĞLANTI HATASI!", 'khoj-message', false); }
+    try {
+        // ABİ SORGUNUN BOŞ OLMADIĞINDAN EMİN OLALIM
+        if (!query) return;
+
+        const response = await fetch(API_URL, { 
+            method: 'POST', 
+            headers: { 
+                'Authorization': `Bearer ${API_KEY}`, 
+                'Content-Type': 'application/json' 
+            }, 
+            body: JSON.stringify({ q: String(query), stream: false, n: 1, client: "web" }) 
+        });
+
+        const data = await response.json(); 
+        document.getElementById('thinking').style.display = 'none';
+
+        if(data && data.response && chats[chatId]) { 
+            let clean = data.response.replace(/\*\*|\[.*?\]|\(https?:\/\/.*?\)/g, '').trim(); 
+            chats[chatId].messages.push({text: clean, type:'khoj-message'}); 
+            
+            if(chatId === activeChatId) {
+                displayMessage(clean, 'khoj-message', true); 
+            }
+            saveAll(); 
         }
+    } catch(e) { 
+        console.error("API HATASI:", e); // Hatayı konsolda görelim
+        document.getElementById('thinking').style.display = 'none'; 
+        if(chatId === activeChatId) displayMessage("BAĞLANTI HATASI!", 'khoj-message', false); 
+    }
+}
 
         function displayMessage(text, type, animate) {
             const d = document.createElement('div'); d.className = `message ${type}`; screen.appendChild(d);
