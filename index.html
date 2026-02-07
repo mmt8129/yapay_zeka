@@ -92,7 +92,24 @@
             <button class="btn btn-gray" onclick="closeModals()">KAPAT</button>
         </div>
     </div>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script>
+        const firebaseConfig = {
+    apiKey: "AIzaSyBqlA4yrw0rJZQyR3t6daJKru28EkmWhe4",
+    authDomain: "khoj-smart.firebaseapp.com",
+    databaseURL: "https://khoj-smart-default-rtdb.firebaseio.com",
+    projectId: "khoj-smart",
+    storageBucket: "khoj-smart.firebasestorage.app",
+    messagingSenderId: "603123756358",
+    appId: "1:603123756358:web:16ec68ba2872ae0436c947"
+};
+
+// Firebase'i çalıştıran komut
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
         const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
         const API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
         let chats = JSON.parse(localStorage.getItem('khoj_chats')) || {};
@@ -103,7 +120,23 @@
         function updateClock() { const now = new Date(); const clock = document.getElementById('live-clock'); if(clock) clock.innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0'); }
         setInterval(updateClock, 1000); updateClock();
 
-        window.onload = () => { applyConfig(); if (Object.keys(chats).length === 0 || !activeChatId || !chats[activeChatId]) { createNewChat(); } else { renderChatList(); loadActiveChat(); } };
+        window.onload = () => {
+    db.ref('khoj_data').once('value').then((snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            chats = data.chats || {};
+            config = data.config || config;
+            activeChatId = data.activeChatId || null;
+        }
+        applyConfig();
+        if (Object.keys(chats).length === 0 || !activeChatId) {
+            createNewChat();
+        } else {
+            renderChatList();
+            loadActiveChat();
+        }
+    });
+};
 
         const screen = document.getElementById('chat-screen');
         let isUserScrolling = false;
@@ -180,8 +213,19 @@
         function adjustConfig(type, val) { if(type === 'speed') config.speed = Math.max(0, config.speed + val); if(type === 'font') config.font = Math.max(10, config.font + val); applyConfig(); }
         function updateTheme(val) { config.theme = val; applyConfig(); }
         function applyConfig() { const fVal = document.getElementById('font-val'), sVal = document.getElementById('speed-val'); if(fVal) fVal.innerText = config.font; if(sVal) sVal.innerText = config.speed; const sp = document.getElementById('system-prompt'); if(sp) sp.value = config.systemPrompt || ''; document.documentElement.style.setProperty('--font-size', config.font + 'px'); document.body.setAttribute('data-theme', config.theme); }
-        function saveAll() { const sp = document.getElementById('system-prompt'); if(sp) config.systemPrompt = sp.value; localStorage.setItem('khoj_chats', JSON.stringify(chats)); localStorage.setItem('khoj_active_id', activeChatId); localStorage.setItem('khoj_config', JSON.stringify(config)); }
-        function confirmClearAll() { if(confirm("HER ŞEY SİLİNSİN Mİ?")) { localStorage.clear(); location.reload(); } }
+function saveAll() {
+    const sp = document.getElementById('system-prompt');
+    if(sp) config.systemPrompt = sp.value;
+    // Buluta kaydetme komutu:
+    db.ref('khoj_data').set({ chats, config, activeChatId });
+}    
+       function confirmClearAll() {
+    if(confirm("HER ŞEY SİLİNSİN Mİ?")) {
+        db.ref('khoj_data').remove().then(() => {
+            location.reload();
+        });
+    }
+}
         document.getElementById('user-input').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
     </script>
 </body>
