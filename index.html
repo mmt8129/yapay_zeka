@@ -20,18 +20,18 @@
     --panel-bg: rgba(0, 0, 0, 0.6); 
     --input-bg: #ffffff; 
     /* ARKA PLAN RESMİ BURAYA */
-    --chat-bg-img: url('https://i.pinimg.com/564x/0f/02/4a/0f024a517c4ca06908142c1e45ec28a7.jpg');
+    --chat-bg-img: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaMG7-xlw8m0ZVhgxg4D1u8rD1c7GTpSPZbTlJQEAwTA&s=10');
 }
 
 [data-theme="white"] { 
     /* AYDINLIK TEMA RENKLERİ */
-    --bg-color: #f5f5f7; 
-    --text-color: #000000; 
+    --bg-color: white; 
+    --text-color: #ffffff; 
     --panel-bg: rgba(255, 255, 255, 0.4); 
     --input-bg: #ffffff; 
     --khoj-border: #ff4b2b; 
     /* ABİ RESİM LİNKİNİ BURAYA YERLEŞTİRDİM */
-    --chat-bg-img: url('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEji4khczBc1iAALI-W-VoYQRGZ00LEqRAENfy0XDGc8uthNPMlTGbJ-h4wRfmKRxaey3VTZhyphenhyphenT7Jlqt5-ijMR6y4haJDsAvYHIOYrS1RwZ6Ny6YtUJkbDoY0K4ZRusIXqNVtNFzyHY4Pbx9/s1600/22181BDF-7300-48B1-9B49-5FA17F8AE0FE.jpeg');
+    --chat-bg-img: url('https://w0.peakpx.com/wallpaper/17/83/HD-wallpaper-ay-yildiz-moon-moonstar-star.jpg');
 }
 
 
@@ -40,11 +40,25 @@
         .menu-btn { position: fixed; top: 5px; left: 15px; font-size: 32px; cursor: pointer; color: white; z-index: 200; }
         .clock-panel { position: fixed; top: 5px; left: 50%; transform: translateX(-50%); background: var(--panel-bg); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--accent); z-index: 150; color: var(--accent); font-weight: 900; font-size: 16px; letter-spacing: 1px; }
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 300; backdrop-filter: blur(5px); }
-        .sidebar { position: fixed; left: -75%; top: 0; width: 75%; height: 100%; background: var(--bg-color); z-index: 301; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px 15px; border-right: 2px solid var(--accent); }
+    
+        .sidebar { 
+    position: fixed; 
+    left: -75%; 
+    top: 0; 
+    width: 75%; 
+    height: 100%; 
+    background: transparent; /* Zemin rengini sabit siyah yaptık 🌑 */
+    z-index: 301; 
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+    padding: 25px 15px; 
+    border-right: 2px solid var(--accent); 
+    color: #ffffff; /* Yazıları beyaz yaptık ⚪ */
+}
+
         .sidebar.active { left: 0; }
-        .sidebar-section { border: 2px solid var(--accent); border-radius: 15px; padding: 12px; margin-bottom: 15px; cursor: pointer; text-align: center; font-weight: 900; color: var(--accent); font-size: 14px; text-transform: uppercase; }
+        .sidebar-section { border: 1.2px solid var(--accent); border-radius: 15px; padding: 12px; margin-bottom: 15px; cursor: pointer; text-align: center; font-weight: 900; color: white !important /*var(--accent)*/ ; font-size: 14px; text-transform: uppercase; }
         .chat-list-container { height: calc(100% - 150px); overflow-y: auto; margin-top: 5px; border: 1.5px solid var(--accent); border-radius: 15px; padding: 10px; background: rgba(128,128,128,0.1); }
-        .chat-item { position: relative; padding: 12px 12px 12px 25px; border-radius: 10px; margin-bottom: 8px; background: rgba(128,128,128,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; color: var(--accent); font-weight: 900; text-transform: uppercase; cursor: pointer; }
+        .chat-item { position: relative; padding: 12px 12px 12px 25px; border-radius: 10px; margin-bottom: 8px; background: rgba(128,128,128,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; color: white !important /*var(--accent)*/ ; font-weight: 900; text-transform: uppercase; cursor: pointer; }
         .chat-item.active { border-color: var(--accent); background: rgba(255, 75, 43, 0.2); }
         .chat-item.active::before { content: ""; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
         #chat-screen { 
@@ -64,7 +78,7 @@
         .message { margin-bottom: 20px; padding: 15px 18px; border-radius: 20px; max-width: 95%; line-height: 1.6; font-size: var(--font-size); word-wrap: break-word; white-space: pre-wrap; }
         .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; margin-left: 5%; 
             background: rgba(255, 255, 255, 0.22); 
-            border: 1.5px solid rgba(255, 75, 43, 0.9); /* Kenarlığı biraz incelttik daha zarif durur */
+            border: 1.2px solid rgba(255, 75, 43, 0.9); /* Kenarlığı biraz incelttik daha zarif durur */
     /* BUĞU EFEKTİ */
     backdrop-filter: blur(10px) saturate(150%);
     -webkit-backdrop-filter: blur(10px) saturate(150%);}
@@ -77,7 +91,7 @@
     backdrop-filter: blur(10px) saturate(150%);
     -webkit-backdrop-filter: blur(10px) saturate(150%);
     
-    border: 1.5px solid rgba(255, 75, 43, 0.9); /* Kenarlığı biraz incelttik daha zarif durur */
+    border: 1.2px solid rgba(255, 75, 43, 0.9); /* Kenarlığı biraz incelttik daha zarif durur */
     color: #FF19C11; /* Portakal rengi yazın */
     border-bottom-left-radius: 4px;
     margin-right: 2%;
@@ -170,7 +184,19 @@
         .dot { width: 12px; height: 12px; background-color: var(--accent); border-radius: 50%; opacity: 0; animation: dotFlow 3s infinite; }
         @keyframes dotFlow { 0%, 100% { opacity: 0; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 400; backdrop-filter: blur(10px); }
-        .modal-box { background: var(--bg-color); width: 92%; max-width: 380px; padding: 25px; border-radius: 25px; border: 2px solid var(--accent); color: var(--text-color); max-height: 85vh; overflow-y: auto; }
+        
+    .modal-box { 
+    background: transparent; /* rgba(0, 0, 0, 0.9); /* Buraya istediğin renk kodunu yaz abi */
+    width: 92%; 
+    max-width: 380px; 
+    padding: 25px; 
+    border-radius: 25px; 
+    border: 1.2px solid var(--accent); 
+    color: #ffffff /* var(--text-color)*/ ;
+    max-height: 85vh; 
+    overflow-y: auto; 
+}
+
         .modern-controls { display: flex; background: rgba(128,128,128,0.1); border-radius: 15px; border: 1px solid #444; overflow: hidden; margin-top: 5px; }
         .btn-ctrl { flex: 1; padding: 15px; border: none; background: transparent; color: var(--text-color); font-size: 20px; font-weight: 900; cursor: pointer; }
         .ctrl-val { flex: 2; display: flex; align-items: center; justify-content: center; background: rgba(128,128,128,0.1); font-size: 14px; font-weight: 900; border-left: 1px solid #444; border-right: 1px solid #444; }
