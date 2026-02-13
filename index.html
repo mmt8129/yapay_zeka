@@ -61,6 +61,10 @@
         .chat-item { position: relative; padding: 12px 12px 12px 25px; border-radius: 10px; margin-bottom: 8px; background: rgba(128,128,128,0.1); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; color: white !important /*var(--accent)*/ ; font-weight: 900; text-transform: uppercase; cursor: pointer; }
         .chat-item.active { border-color: #ffffff; background: rgba(255, 255, 255, 0.2); }
         .chat-item.active::before { content: ""; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: #ffffff; border-radius: 50%; }
+       .setting-item label {
+    color: #ffffff !important; /* Tüm alt başlıklar beyaz ⚪ */
+       }
+        
         #chat-screen { 
     height: 100%; 
     overflow-y: auto; 
@@ -197,14 +201,14 @@
     overflow-y: auto; 
 }
 
-        .modern-controls { display: flex; background: rgba(128,128,128,0.1); border-radius: 15px; border: 1px solid #444; overflow: hidden; margin-top: 5px; }
-        .btn-ctrl { flex: 1; padding: 15px; border: none; background: transparent; color: var(--text-color); font-size: 20px; font-weight: 900; cursor: pointer; }
-        .ctrl-val { flex: 2; display: flex; align-items: center; justify-content: center; background: rgba(128,128,128,0.1); font-size: 14px; font-weight: 900; border-left: 1px solid #444; border-right: 1px solid #444; }
+        .modern-controls { display: flex; background: rgba(128,128,128,0.1); border-radius: 15px; border: 1px solid #ffffff; overflow: hidden; margin-top: 5px; }
+        .btn-ctrl { flex: 1; padding: 15px; border: none; background: transparent; color: #ffffff; font-size: 20px; font-weight: 900; cursor: pointer; }
+        .ctrl-val { flex: 2; display: flex; align-items: center; justify-content: center; background: rgba(128,128,128,0.1); font-size: 14px; font-weight: 900; border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; }
         .btn { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: 900; cursor: pointer; margin-top: 10px; font-size: 14px; text-transform: uppercase; }
         .btn-orange { background: var(--accent); color: white; }
         .btn-danger { background: #c0392b; color: white; }
         .btn-gray { background: #666; color: white; }
-        select, textarea { width: 100%; padding: 12px; border-radius: 12px; background: rgba(128,128,128,0.1); border: 1px solid #444; color: var(--text-color); font-family: inherit; margin-top: 5px; }
+        select, textarea { width: 100%; padding: 12px; border-radius: 12px; background: rgba(128,128,128,0.1); border: 1px solid #ffffff; color: #ffffff; font-family: inherit; margin-top: 5px; }
     </style>
 </head>
 <body data-theme="dark">
