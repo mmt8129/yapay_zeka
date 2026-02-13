@@ -31,7 +31,7 @@ body, html, .message, .user-message, .khoj-message, .sidebar, .sidebar-section, 
 [data-theme="white"] { 
     /* AYDINLIK TEMA RENKLERİ */
     --bg-color: #121212; 
-    --text-color: black; 
+    --text-color: white; 
     --panel-bg: rgba(255, 255, 255, 0.4); 
     --input-bg: #ffffff; 
     --khoj-border: #ff4b2b; 
@@ -43,7 +43,10 @@ body, html, .message, .user-message, .khoj-message, .sidebar, .sidebar-section, 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-color); overflow: hidden; transition: background 0.3s, color 0.3s; }
         .menu-btn { position: fixed; top: 5px; left: 15px; font-size: 32px; cursor: pointer; color: white; z-index: 200; }
-        .clock-panel { position: fixed; top: 5px; left: 50%; transform: translateX(-50%); background:transparent /*var(--panel-bg)*/; backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 20px; border: 2px solid #ffffff; z-index: 150; color: white/*var(--accent)*/; font-weight: 900; font-size: 16px; letter-spacing: 1px; }
+        .clock-panel { position: fixed; top: 5px; left: 50%; transform: translateX(-50%); background:transparent /*var(--panel-bg)*/; backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 20px; border: 2px solid #ffffff; z-index: 150; color: white/*var(--accent)*/; font-weight: 900; font-size: 16px; letter-spacing: 1px; text-shadow: 3px 3px 3px #000000; /* Keskin siyah gölge ⚫ */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+
+                     }
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 300; backdrop-filter: blur(5px); }
     
         .sidebar { 
@@ -90,6 +93,9 @@ body, html, .message, .user-message, .khoj-message, .sidebar, .sidebar-section, 
             border: 2px solid rgba(255, 255, 255, 0.9); /* Kenarlığı biraz incelttik daha zarif durur */
     /* BUĞU EFEKTİ */
     backdrop-filter: blur(10px) saturate(150%);
+      text-shadow: 3px 3px 3px #000000; /* Keskin siyah gölge ⚫ */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+                            
     -webkit-backdrop-filter: blur(10px) saturate(150%);}
         
     .khoj-message {
@@ -108,7 +114,8 @@ body, html, .message, .user-message, .khoj-message, .sidebar, .sidebar-section, 
     padding: 15px 18px;
         text-shadow: 3px 3px 3px #000000; /* Keskin siyah gölge ⚫ */
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Hafif gölge */
-}
+
+    }
 
 .input-wrapper {
     position: fixed; 
@@ -146,8 +153,8 @@ body, html, .message, .user-message, .khoj-message, .sidebar, .sidebar-section, 
     border: none; 
     cursor: pointer; 
     /* ABİ BOYUTU KÜÇÜLTTÜK */
-    width: 35px; 
-    height: 40px; 
+    width: 45px; 
+    height: 50px; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
@@ -155,7 +162,7 @@ body, html, .message, .user-message, .khoj-message, .sidebar, .sidebar-section, 
     margin-bottom: 5px
     padding: 0;
     /* TURUNCU RENK BURADA SABİT */
-    color: #ff4b2b; 
+    color: white; 
     fill: #ff4b2b;
 }
 
@@ -163,8 +170,8 @@ body, html, .message, .user-message, .khoj-message, .sidebar, .sidebar-section, 
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 35px; /* Buton alanını hafif büyüttük */
-    height: 35px;
+    width: 45px; /* Buton alanını hafif büyüttük */
+    height: 50px;
     background: none;
     border: none;
     cursor: pointer;
@@ -175,9 +182,9 @@ body, html, .message, .user-message, .khoj-message, .sidebar, .sidebar-section, 
 
 .send-btn svg {
     /* ABİ SİMGE BURADAN BÜYÜR (20px'di 24px yaptık) */
-    width: 24px; 
-    height: 24px;
-    fill: #ff4b2b; /* Turuncu rengin */
+    width: 28px; 
+    height: 28px;
+    fill: white; /* Turuncu rengin */
 }
 
 
@@ -185,7 +192,7 @@ body, html, .message, .user-message, .khoj-message, .sidebar, .sidebar-section, 
 .send-btn img {
     width: 100% !important; 
     height: 100% !important;
-    transform: scale(1.5); /* ABİ BURADAKİ 1.5 DEĞERİNİ ARTIRARAK DEVASA YAPABİLİRSİN */
+    transform: scale(2.0); /* ABİ BURADAKİ 1.5 DEĞERİNİ ARTIRARAK DEVASA YAPABİLİRSİN */
     display: block !important;
 } 
         .retry-container { display: flex; justify-content: center; margin-top: 5px; }
