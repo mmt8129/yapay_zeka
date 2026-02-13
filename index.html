@@ -24,20 +24,20 @@
     --chat-bg-img: url('https://images.pexels.com/photos/121449/nature-landscape-night-stars-121449.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load');
 }
 
-[data-theme="white"] { 
+/*[data-theme="white"] { */
     /* AYDINLIK TEMA RENKLERİ */
-    --bg-color: #121212; 
+   /* --bg-color: white; 
     --text-color: white; 
     --panel-bg: rgba(255, 255, 255, 0.4); 
     --input-bg: #ffffff; 
-    --khoj-border: #ff4b2b; 
+    --khoj-border: #ff4b2b; */
     /* ABİ RESİM LİNKİNİ BURAYA YERLEŞTİRDİM */
-    --chat-bg-img: url('https://i.pinimg.com/736x/83/30/e2/8330e2816436feba3899683a17c6df78.jpg');
-}
+ /*   --chat-bg-img: url('https://i.pinimg.com/736x/83/30/e2/8330e2816436feba3899683a17c6df78.jpg');
+}*/
 
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-color); overflow: hidden; transition: background 0.3s, color 0.3s; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: var(--bg-color); color: white; overflow: hidden; transition: background 0.3s, color 0.3s; }
         .menu-btn { position: fixed; top: 5px; left: 15px; font-size: 32px; cursor: pointer; color: white; z-index: 200; }
         .clock-panel { position: fixed; top: 5px; left: 50%; transform: translateX(-50%); background:transparent /*var(--panel-bg)*/; backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 20px; border: 2px solid #ffffff; z-index: 150; color: white/*var(--accent)*/; font-weight: 900; font-size: 16px; letter-spacing: 1px; text-shadow: 3px 3px 3px #000000; /* Keskin siyah gölge ⚫ */
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Hafif gölge */
@@ -84,7 +84,7 @@
 }
 
         .message { margin-bottom: 20px; padding: 15px 18px; border-radius: 20px; max-width: 95%; line-height: 1.6; font-size: var(--font-size); font-weight: 700; word-wrap: break-word; white-space: pre-wrap; }
-        .user-message { align-self: flex-end; background: var(--user-bubble); color: black; border-bottom-right-radius: 4px; margin-left: 5%; 
+        .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; margin-left: 5%; 
             background: rgba(255, 255, 255, 0.1); 
             border: 2px solid rgba(255, 255, 255, 0.9); /* Kenarlığı biraz incelttik daha zarif durur */
     /* BUĞU EFEKTİ */
