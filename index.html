@@ -23,13 +23,13 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-color); overflow: hidden; }
 
-        /* ÜST BANNER */
         .top-banner { 
             position: fixed; top: 0; width: 100%; height: 60px; 
             background: var(--header-bg); display: flex; align-items: center; 
             justify-content: space-between; padding: 0 15px; z-index: 1000; 
             border-bottom: 2px solid #e2e8f0;
         }
+
         .header-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 20px; }
         .header-left { display: flex; gap: 10px; align-items: center; }
         .header-right { display: flex; gap: 10px; }
@@ -38,20 +38,17 @@
         .btn-gray { background: #64748b; color: white; }
         #live-clock { font-weight: 900; font-size: 18px; color: #1e293b; }
 
-        /* CHAT EKRANI */
         #chat-screen { height: 100%; overflow-y: auto; padding: 75px 10px 110px; display: flex; flex-direction: column; background: #f8fafc; }
 
-        .message { margin-bottom: 15px; padding: 12px 18px; font-size: var(--font-size); font-weight: var(--font-weight); word-wrap: break-word; line-height: 1.6; white-space: pre-wrap; }
+        .message { margin-bottom: 12px; padding: 12px 15px; font-size: var(--font-size); font-weight: var(--font-weight); word-wrap: break-word; line-height: 1.5; white-space: pre-wrap; }
         .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-radius: 15px; max-width: 85%; border: none; }
-        .khoj-message { align-self: flex-start; background: transparent; color: #1e293b; max-width: 98%; padding: 10px; }
+        .khoj-message { align-self: flex-start; background: transparent; color: #1e293b; max-width: 98%; padding: 5px; }
 
-        /* EFEKTLER */
         .effect-fade { animation: fadeIn 0.5s ease forwards; }
         .effect-slide { animation: slideUp 0.4s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ALT GİRİŞ ALANI VE KALIN AKAN ÇİZGİ */
         .input-wrapper { position: fixed; bottom: 0; width: 100%; background: white; padding: 8px 12px; z-index: 1000; border-top: 4px solid #3b82f6; }
         
         #progress-line {
@@ -61,30 +58,33 @@
             display: none;
             animation: moveLine 1.2s linear infinite;
         }
-        @keyframes moveLine {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+        @keyframes moveLine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
         .input-container { display: flex; align-items: center; gap: 8px; max-width: 800px; margin: 0 auto; }
         #user-input { flex: 1; background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 12px; padding: 10px; font-size: 16px; font-weight: 900; color: #1e293b; resize: none; min-height: 44px; max-height: 120px; }
         .send-btn { background: #22c55e; color: white; width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
 
-        /* MODALLAR */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
         .modal-box { background: white; width: 92%; max-width: 400px; border-radius: 20px; border: 3px solid #3b82f6; padding: 20px; max-height: 85vh; display: flex; flex-direction: column; }
         .modal-title { text-align: center; color: #3b82f6; font-weight: 900; margin-bottom: 15px; text-transform: uppercase; }
-        .chat-list-scroll { flex: 1; overflow-y: auto; margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 10px; min-height: 350px; }
+        
+        .setting-row { margin-bottom: 12px; }
+        .ctrl-group { display: flex; border: 2px solid #3b82f6; border-radius: 10px; overflow: hidden; margin-top: 5px; }
+        .btn-ctrl { flex: 1; padding: 8px; border: none; background: white; font-weight: 900; cursor: pointer; }
+        .ctrl-val { flex: 2; display: flex; align-items: center; justify-content: center; background: #eff6ff; font-weight: 900; border-left: 2px solid #3b82f6; border-right: 2px solid #3b82f6; }
+        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 5px; }
+        select { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #3b82f6; font-weight: 900; margin-top: 5px; }
+        
+        .chat-list-scroll { flex: 1; overflow-y: auto; margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 10px; min-height: 300px; }
         .history-item { padding: 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
         .history-item.active { background: #eff6ff; border-left: 5px solid #3b82f6; }
-        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <div class="top-banner">
         <div class="header-left"><div class="header-btn btn-gray" onclick="openSettings()">⚙️</div><div id="live-clock">00:00</div></div>
-        <div class="header-right"><div class="header-btn btn-blue" onclick="openHistory()">🕒</div><div class="header-btn btn-green" onclick="askNewChat()">+</div></div>
+        <div class="header-right"><div class="header-btn btn-blue" onclick="openHistory()">🕒</div><div class="header-btn btn-green" onclick="createNewChat()">+</div></div>
     </div>
 
     <div id="chat-screen"></div>
@@ -97,8 +97,52 @@
         </div>
     </div>
 
-    <div id="history-modal" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">GEÇMİŞ</h3><div id="chat-list" class="chat-list-scroll"></div><button class="btn btn-green" onclick="confirmSelectChat()">TAMAM</button><button class="btn btn-gray" onclick="closeModals()">KAPAT</button></div></div>
-    <div id="settings-modal" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">AYARLAR</h3><button class="btn btn-blue" onclick="saveSettings()">KAPAT</button></div></div>
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title">AYARLAR</h3>
+            <div class="setting-row">
+                <label style="font-size:11px; font-weight:900">YAZI BOYUTU</label>
+                <div class="ctrl-group">
+                    <button class="btn-ctrl" onclick="adjustConfig('font', -1)">-</button>
+                    <div class="ctrl-val"><span id="font-val">16</span>PX</div>
+                    <button class="btn-ctrl" onclick="adjustConfig('font', 1)">+</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <label style="font-size:11px; font-weight:900">YAZI KALINLIĞI</label>
+                <div class="ctrl-group">
+                    <button class="btn-ctrl" onclick="adjustConfig('weight', -100)">-</button>
+                    <div class="ctrl-val"><span id="weight-val">900</span></div>
+                    <button class="btn-ctrl" onclick="adjustConfig('weight', 100)">+</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <label style="font-size:11px; font-weight:900">EFEKT SEÇİMİ</label>
+                <select id="effect-select" onchange="adjustConfig('effect', this.value)">
+                    <option value="typewriter">DAKTİLO</option>
+                    <option value="fade">SOLARAK GELME</option>
+                    <option value="slide">KAYARAK GELME</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <label style="font-size:11px; font-weight:900">CEVAP HIZI</label>
+                <div class="ctrl-group">
+                    <button class="btn-ctrl" onclick="adjustConfig('speed', -5)">-</button>
+                    <div class="ctrl-val"><span id="speed-val">20</span>MS</div>
+                    <button class="btn-ctrl" onclick="adjustConfig('speed', 5)">+</button>
+                </div>
+            </div>
+            <button class="btn btn-blue" onclick="saveSettings()">KAYDET VE KAPAT</button>
+        </div>
+    </div>
+
+    <div id="history-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title">GEÇMİŞ</h3>
+            <div id="chat-list" class="chat-list-scroll"></div>
+            <button class="btn btn-blue" onclick="closeModals()">KAPAT</button>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -117,18 +161,35 @@
         window.onload = () => {
             database.ref().once('value', (s) => {
                 const d = s.val();
-                if (d) { chats = d.khoj_chats || {}; config = d.khoj_config || config; applyConfig(); activeChatId = localStorage.getItem('active_id') || Object.keys(chats)[0]; if (activeChatId && chats[activeChatId]) loadActiveChat(); else createNewChat(); } else createNewChat();
+                if (d) { 
+                    chats = d.khoj_chats || {}; 
+                    config = d.khoj_config || config; 
+                    applyConfig();
+                    activeChatId = localStorage.getItem('active_id') || Object.keys(chats)[0];
+                    if (activeChatId && chats[activeChatId]) loadActiveChat(); else createNewChat();
+                } else createNewChat();
             });
         };
 
         function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
-        function openHistory() { document.getElementById('history-modal').style.display = 'flex'; }
+        function openHistory() { renderChatList(); document.getElementById('history-modal').style.display = 'flex'; }
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
         function createNewChat() {
             const id = 'chat_' + Date.now();
             chats[id] = { title: "YENİ SOHBET", messages: [], date: new Date().toLocaleString('tr-TR') };
             activeChatId = id; saveAll(); loadActiveChat();
+        }
+
+        function renderChatList() {
+            const list = document.getElementById('chat-list'); list.innerHTML = '';
+            Object.keys(chats).sort((a,b) => b.split('_')[1] - a.split('_')[1]).forEach(id => {
+                const item = document.createElement('div');
+                item.className = `history-item ${id === activeChatId ? 'active' : ''}`;
+                item.innerHTML = `<div style="font-weight:900;">${chats[id].title}</div><div style="font-size:10px;">${chats[id].date}</div>`;
+                item.onclick = () => { activeChatId = id; loadActiveChat(); saveAll(); closeModals(); };
+                list.appendChild(item);
+            });
         }
 
         function loadActiveChat() {
@@ -143,27 +204,27 @@
             i.value = ''; 
             displayMessage(t, 'user-message', true);
             chats[activeChatId].messages.push({text: t, type:'user-message'});
-            
-            const progress = document.getElementById('progress-line');
-            progress.style.display = 'block';
+            if(chats[activeChatId].title === "YENİ SOHBET") chats[activeChatId].title = t.substring(0,20).toUpperCase();
+
+            document.getElementById('progress-line').style.display = 'block';
 
             try {
                 const r = await fetch(API_URL, { method: 'POST', headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ q: t, stream: false }) });
                 const d = await r.json();
-                progress.style.display = 'none';
+                document.getElementById('progress-line').style.display = 'none';
                 if(d.response) {
                     let cleaned = d.response
                         .replace(/\(.*?\)/g, '') 
                         .replace(/\[.*?\]/g, '') 
                         .replace(/(?:https?|ftp):\/\/[\n\S]+/g, '') 
-                        .replace(/\*/g, '\n🔹') 
+                        .replace(/^\s*\*\s+/gm, '🔹 ') 
                         .trim();
                         
                     chats[activeChatId].messages.push({text: cleaned, type:'khoj-message'});
                     displayMessage(cleaned, 'khoj-message', true); 
                     saveAll();
                 }
-            } catch(e) { progress.style.display = 'none'; }
+            } catch(e) { document.getElementById('progress-line').style.display = 'none'; }
         }
 
         function displayMessage(t, type, anim) {
@@ -181,7 +242,18 @@
             } else { d.textContent = t; s.scrollTop = s.scrollHeight; }
         }
 
+        function adjustConfig(type, val) {
+            if(type === 'font') config.font = Math.max(12, config.font + val);
+            if(type === 'weight') config.weight = Math.min(900, Math.max(100, config.weight + val));
+            if(type === 'speed') config.speed = Math.max(0, config.speed + val);
+            if(type === 'effect') config.effect = val;
+            applyConfig();
+        }
+
         function applyConfig() {
+            document.getElementById('font-val').innerText = config.font;
+            document.getElementById('weight-val').innerText = config.weight;
+            document.getElementById('speed-val').innerText = config.speed;
             document.documentElement.style.setProperty('--font-size', config.font + 'px');
             document.documentElement.style.setProperty('--font-weight', config.weight);
         }
