@@ -44,16 +44,10 @@
         .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-radius: 15px; max-width: 85%; border: none; }
         .khoj-message { align-self: flex-start; background: transparent; color: #1e293b; max-width: 98%; padding: 5px; }
 
-        .effect-fade { animation: fadeIn 0.5s ease forwards; }
-        .effect-slide { animation: slideUp 0.4s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
         .input-wrapper { position: fixed; bottom: 0; width: 100%; background: white; padding: 8px 12px; z-index: 1000; border-top: 4px solid #3b82f6; }
-        
         #progress-line {
             position: absolute; top: -4px; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(to right, transparent, #22c55e, #3b82f6, #22c55e, transparent);
+            background: linear-gradient(to right, transparent, #ef4444, #3b82f6, #ef4444, transparent);
             background-size: 200% 100%;
             display: none;
             animation: moveLine 1.2s linear infinite;
@@ -68,23 +62,19 @@
         .modal-box { background: white; width: 92%; max-width: 400px; border-radius: 20px; border: 3px solid #3b82f6; padding: 20px; max-height: 85vh; display: flex; flex-direction: column; }
         .modal-title { text-align: center; color: #3b82f6; font-weight: 900; margin-bottom: 15px; text-transform: uppercase; }
         
-        .setting-row { margin-bottom: 12px; }
-        .ctrl-group { display: flex; border: 2px solid #3b82f6; border-radius: 10px; overflow: hidden; margin-top: 5px; }
-        .btn-ctrl { flex: 1; padding: 8px; border: none; background: white; font-weight: 900; cursor: pointer; }
-        .ctrl-val { flex: 2; display: flex; align-items: center; justify-content: center; background: #eff6ff; font-weight: 900; border-left: 2px solid #3b82f6; border-right: 2px solid #3b82f6; }
-        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 5px; }
-        select { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #3b82f6; font-weight: 900; margin-top: 5px; }
-        
         .chat-list-scroll { flex: 1; overflow-y: auto; margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 10px; min-height: 300px; }
-        .history-item { padding: 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+        .history-item { padding: 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; user-select: none; }
         .history-item.active { background: #eff6ff; border-left: 5px solid #3b82f6; }
+
+        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 5px; }
+        .btn-red { background: #ef4444; color: white; }
     </style>
 </head>
 <body>
 
     <div class="top-banner">
         <div class="header-left"><div class="header-btn btn-gray" onclick="openSettings()">⚙️</div><div id="live-clock">00:00</div></div>
-        <div class="header-right"><div class="header-btn btn-blue" onclick="openHistory()">🕒</div><div class="header-btn btn-green" onclick="createNewChat()">+</div></div>
+        <div class="header-right"><div class="header-btn btn-blue" onclick="openHistory()">🕒</div><div class="header-btn btn-green" onclick="askNewChat()">+</div></div>
     </div>
 
     <div id="chat-screen"></div>
@@ -100,39 +90,7 @@
     <div id="settings-modal" class="modal-overlay">
         <div class="modal-box">
             <h3 class="modal-title">AYARLAR</h3>
-            <div class="setting-row">
-                <label style="font-size:11px; font-weight:900">YAZI BOYUTU</label>
-                <div class="ctrl-group">
-                    <button class="btn-ctrl" onclick="adjustConfig('font', -1)">-</button>
-                    <div class="ctrl-val"><span id="font-val">16</span>PX</div>
-                    <button class="btn-ctrl" onclick="adjustConfig('font', 1)">+</button>
-                </div>
-            </div>
-            <div class="setting-row">
-                <label style="font-size:11px; font-weight:900">YAZI KALINLIĞI</label>
-                <div class="ctrl-group">
-                    <button class="btn-ctrl" onclick="adjustConfig('weight', -100)">-</button>
-                    <div class="ctrl-val"><span id="weight-val">900</span></div>
-                    <button class="btn-ctrl" onclick="adjustConfig('weight', 100)">+</button>
-                </div>
-            </div>
-            <div class="setting-row">
-                <label style="font-size:11px; font-weight:900">EFEKT SEÇİMİ</label>
-                <select id="effect-select" onchange="adjustConfig('effect', this.value)">
-                    <option value="typewriter">DAKTİLO</option>
-                    <option value="fade">SOLARAK GELME</option>
-                    <option value="slide">KAYARAK GELME</option>
-                </select>
-            </div>
-            <div class="setting-row">
-                <label style="font-size:11px; font-weight:900">CEVAP HIZI</label>
-                <div class="ctrl-group">
-                    <button class="btn-ctrl" onclick="adjustConfig('speed', -5)">-</button>
-                    <div class="ctrl-val"><span id="speed-val">20</span>MS</div>
-                    <button class="btn-ctrl" onclick="adjustConfig('speed', 5)">+</button>
-                </div>
-            </div>
-            <button class="btn btn-blue" onclick="saveSettings()">KAYDET VE KAPAT</button>
+            <button class="btn btn-blue" onclick="closeModals()">KAPAT</button>
         </div>
     </div>
 
@@ -141,6 +99,27 @@
             <h3 class="modal-title">GEÇMİŞ</h3>
             <div id="chat-list" class="chat-list-scroll"></div>
             <button class="btn btn-blue" onclick="closeModals()">KAPAT</button>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title">DÜZENLE</h3>
+            <input type="text" id="edit-name-input" style="width:100%; padding:12px; border-radius:10px; border:2px solid #3b82f6; font-weight:900; margin-bottom:15px;">
+            <button class="btn btn-blue" onclick="saveChatEdit()">GÜNCELLE</button>
+            <button class="btn btn-red" onclick="deleteSingleChat()">SİL</button>
+            <button class="btn btn-gray" onclick="closeModals()">VAZGEÇ</button>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-box" style="text-align:center">
+            <h3 class="modal-title">ONAY</h3>
+            <p id="confirm-text" style="font-weight:900"></p>
+            <div style="display:flex; gap:10px; margin-top:10px">
+                <button class="btn btn-green" id="confirm-yes">EVET</button>
+                <button class="btn btn-red" onclick="closeModals()">HAYIR</button>
+            </div>
         </div>
     </div>
 
@@ -153,7 +132,7 @@
         const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
         const API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
 
-        let chats = {}, activeChatId = null, config = { speed: 20, font: 16, weight: 900, effect: 'typewriter' };
+        let chats = {}, activeChatId = null, selectedChatId = null, pressTimer, config = { speed: 20, font: 16, weight: 900, effect: 'typewriter' };
 
         function updateClock() { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}); }
         setInterval(updateClock, 1000); updateClock();
@@ -161,19 +140,19 @@
         window.onload = () => {
             database.ref().once('value', (s) => {
                 const d = s.val();
-                if (d) { 
-                    chats = d.khoj_chats || {}; 
-                    config = d.khoj_config || config; 
-                    applyConfig();
-                    activeChatId = localStorage.getItem('active_id') || Object.keys(chats)[0];
-                    if (activeChatId && chats[activeChatId]) loadActiveChat(); else createNewChat();
-                } else createNewChat();
+                if (d) { chats = d.khoj_chats || {}; config = d.khoj_config || config; applyConfig(); activeChatId = localStorage.getItem('active_id') || Object.keys(chats)[0]; if (activeChatId && chats[activeChatId]) loadActiveChat(); else createNewChat(); } else createNewChat();
             });
         };
 
         function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
         function openHistory() { renderChatList(); document.getElementById('history-modal').style.display = 'flex'; }
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+
+        function askNewChat() { 
+            document.getElementById('confirm-text').innerText = "YENİ SOHBET BAŞLATILSIN MI?";
+            document.getElementById('confirm-yes').onclick = () => { createNewChat(); closeModals(); };
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
 
         function createNewChat() {
             const id = 'chat_' + Date.now();
@@ -187,10 +166,20 @@
                 const item = document.createElement('div');
                 item.className = `history-item ${id === activeChatId ? 'active' : ''}`;
                 item.innerHTML = `<div style="font-weight:900;">${chats[id].title}</div><div style="font-size:10px;">${chats[id].date}</div>`;
+                
+                item.ontouchstart = () => { pressTimer = setTimeout(() => openEditModal(id), 1500); };
+                item.ontouchend = () => clearTimeout(pressTimer);
+                item.onmousedown = () => { pressTimer = setTimeout(() => openEditModal(id), 1500); };
+                item.onmouseup = () => clearTimeout(pressTimer);
+                
                 item.onclick = () => { activeChatId = id; loadActiveChat(); saveAll(); closeModals(); };
                 list.appendChild(item);
             });
         }
+
+        function openEditModal(id) { selectedChatId = id; document.getElementById('edit-name-input').value = chats[id].title; document.getElementById('edit-modal').style.display = 'flex'; }
+        function saveChatEdit() { chats[selectedChatId].title = document.getElementById('edit-name-input').value.toUpperCase(); saveAll(); renderChatList(); closeModals(); }
+        function deleteSingleChat() { delete chats[selectedChatId]; if(activeChatId === selectedChatId) activeChatId = Object.keys(chats)[0]; saveAll(); location.reload(); }
 
         function loadActiveChat() {
             const s = document.getElementById('chat-screen'); s.innerHTML = '';
@@ -217,7 +206,8 @@
                         .replace(/\(.*?\)/g, '') 
                         .replace(/\[.*?\]/g, '') 
                         .replace(/(?:https?|ftp):\/\/[\n\S]+/g, '') 
-                        .replace(/^\s*\*\s+/gm, '🔹 ') 
+                        .replace(/^\s*\*\s+/gm, '🔹 ')
+                        .replace(/\*\*(.*?)\*\*/g, '<span style="color:#ef4444;">$1</span>')
                         .trim();
                         
                     chats[activeChatId].messages.push({text: cleaned, type:'khoj-message'});
@@ -229,36 +219,15 @@
 
         function displayMessage(t, type, anim) {
             const s = document.getElementById('chat-screen'), d = document.createElement('div');
-            d.className = `message ${type}`; s.appendChild(d);
-            if(anim) {
-                if(config.effect === 'typewriter' && type === 'khoj-message') {
-                    let idx = 0; d.textContent = "";
-                    function tw() { if(idx < t.length) { d.textContent += t.charAt(idx++); s.scrollTop = s.scrollHeight; setTimeout(tw, config.speed); } } tw();
-                } else {
-                    d.textContent = t;
-                    d.classList.add(config.effect === 'fade' ? 'effect-fade' : 'effect-slide');
-                    s.scrollTop = s.scrollHeight;
-                }
-            } else { d.textContent = t; s.scrollTop = s.scrollHeight; }
-        }
-
-        function adjustConfig(type, val) {
-            if(type === 'font') config.font = Math.max(12, config.font + val);
-            if(type === 'weight') config.weight = Math.min(900, Math.max(100, config.weight + val));
-            if(type === 'speed') config.speed = Math.max(0, config.speed + val);
-            if(type === 'effect') config.effect = val;
-            applyConfig();
+            d.className = `message ${type}`; d.innerHTML = t; s.appendChild(d);
+            s.scrollTop = s.scrollHeight;
         }
 
         function applyConfig() {
-            document.getElementById('font-val').innerText = config.font;
-            document.getElementById('weight-val').innerText = config.weight;
-            document.getElementById('speed-val').innerText = config.speed;
             document.documentElement.style.setProperty('--font-size', config.font + 'px');
             document.documentElement.style.setProperty('--font-weight', config.weight);
         }
 
-        function saveSettings() { saveAll(); closeModals(); }
         function saveAll() { database.ref('khoj_chats').set(chats); database.ref('khoj_config').set(config); localStorage.setItem('active_id', activeChatId); }
     </script>
 </body>
