@@ -98,13 +98,18 @@
 </head>
 <body>
 
-    <div class="top-banner">
-        <div class="header-left"><div class="header-btn btn-gray" onclick="openSettings()">⚙️</div><div id="live-clock">00:00</div></div>
-        <div class="header-btn btn-red" onclick="askResetKhoj()">!</div> <div class="header-right">
-            <div class="header-btn btn-blue" onclick="openHistory()" style="display:none;">🕒</div>
-            <div class="header-btn btn-green" onclick="askClearChat()">🧹</div>
-        </div>
+   <div class="top-banner">
+    <div class="header-left">
+        <div class="header-btn btn-gray" onclick="openSettings()">⚙️</div>
+        <div id="live-clock">00:00</div>
     </div>
+    
+    <div class="header-right">
+        <div class="header-btn btn-red" onclick="askResetKhoj()">!</div>
+        
+        <div class="header-btn btn-green" onclick="askClearChat()">🧹</div>
+    </div>
+</div>
 
     <div id="chat-screen"></div>
 
