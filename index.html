@@ -100,7 +100,7 @@
 
     <div class="top-banner">
         <div class="header-left"><div class="header-btn btn-gray" onclick="openSettings()">⚙️</div><div id="live-clock">00:00</div></div>
-        <div class="header-right">
+        <div class="header-btn btn-red" onclick="askResetKhoj()">!</div> <div class="header-right">
             <div class="header-btn btn-blue" onclick="openHistory()" style="display:none;">🕒</div>
             <div class="header-btn btn-green" onclick="askClearChat()">🧹</div>
         </div>
@@ -319,6 +319,42 @@
 
         function saveSettings() { saveAll(); closeModals(); }
         function saveAll() { database.ref('khoj_chats').set(chats); database.ref('khoj_config').set(config); localStorage.setItem('active_id', activeChatId); }
-    </script>
+ function askResetKhoj() {
+    document.getElementById('confirm-text').innerText = "GEÇMİŞ UNUTULACAK, ONAYLIYOR MUSUNUZ?";
+    document.getElementById('confirm-yes').onclick = () => { startKhojReset(); };
+    document.getElementById('confirm-modal').style.display = 'flex';
+}
+
+async function startKhojReset() {
+    closeModals();
+    document.getElementById('reset-modal').style.display = 'flex';
+    document.getElementById('reset-done-btn').style.display = 'none';
+    document.getElementById('reset-status').style.display = 'block';
+    document.getElementById('reset-title').innerText = "SIFIRLANIYOR";
+    try {
+        const msg = "şimdiye kadar olan konuşmalarımızı unut, bundan sonraki konuşmalarımız da asla geçmiş konulardan bahsetme!";
+        await fetch(API_URL, { 
+            method: 'POST', 
+            headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ q: msg, stream: false }) 
+        });
+        document.getElementById('reset-status').style.display = 'none';
+        document.getElementById('reset-title').innerText = "BAŞARILI";
+        document.getElementById('reset-done-btn').style.display = 'block';
+    } catch(e) { closeModals(); alert("Hata oluştu!"); }
+}
+
+function completeReset() { 
+    clearActiveChat(); // Bu senin mevcut temizleme fonksiyonun, ekranı ve firebase'i siler.
+    closeModals(); 
+}
+ </script>
+	<div id="reset-modal" class="modal-overlay">
+    <div class="modal-box" style="text-align:center">
+        <h3 class="modal-title" id="reset-title">SIFIRLANIYOR</h3>
+        <p id="reset-status" style="font-weight:900">Sıfırlanıyor<span class="dot-anim dot-1">.</span><span class="dot-anim dot-2">.</span><span class="dot-anim dot-3">.</span></p>
+        <button class="btn btn-blue" id="reset-done-btn" style="display:none;" onclick="completeReset()">TAMAM</button>
+    </div>
+</div>
 </body>
 </html>
