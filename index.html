@@ -2,364 +2,119 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MMT Pro</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-icon" href="icon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grok & Tavily Local Test</title>
     <style>
-        :root { 
-            --bg-color: #f0f4f8; 
-            --text-color: #1a1a1a; 
-            --user-bubble: #3b82f6; 
-            --accent: #22c55e; 
-            --font-size: 16px; 
-            --font-weight: 900;
-            --header-bg: #ffffff;
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-color); overflow: hidden; }
-
-        .top-banner { 
-            position: fixed; top: 0; width: 100%; height: 60px; 
-            background: var(--header-bg); display: flex; align-items: center; 
-            justify-content: space-between; padding: 0 15px; z-index: 1000; 
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .header-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 20px; }
-        .header-left { display: flex; gap: 10px; align-items: center; }
-        .header-right { display: flex; gap: 10px; }
-        .btn-blue { background: #3b82f6; color: white; }
-        .btn-green { background: #22c55e; color: white; }
-        .btn-gray { background: #64748b; color: white; }
-        .btn-red { background: #ef4444; color: white; }
-        #live-clock { font-weight: 900; font-size: 18px; color: #1e293b; }
-
-        #chat-screen { height: 100%; overflow-y: auto; padding: 75px 10px 110px; display: flex; flex-direction: column; background: #f8fafc; }
-
-        .message { margin-bottom: 12px; padding: 12px 15px; font-size: var(--font-size); font-weight: var(--font-weight); word-wrap: break-word; line-height: 1.5; white-space: pre-wrap; }
-        .user-message { align-self: flex-end; background: var(--user-bubble); color: white; border-radius: 15px; max-width: 85%; border: none; }
-        .khoj-message { align-self: flex-start; background: transparent; color: #1e293b; max-width: 98%; padding: 5px; }
-
-        /* Efektler */
-        .effect-fade { animation: fadeIn 0.5s ease forwards; }
-        .effect-slide { animation: slideUp 0.4s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .input-wrapper { position: fixed; bottom: 0; width: 100%; background: white; padding: 8px 12px; z-index: 1000; border-top: 4px solid #3b82f6; }
-        
-        #typing-status { 
-            position: absolute; top: -30px; left: 15px; 
-            color: #3b82f6; font-weight: 900; font-size: 14px; 
-            display: none; 
-        }
-        .dot-anim { animation: dotPulse 1.5s infinite; opacity: 0; font-size: 18px; }
-        .dot-1 { animation-delay: 0.0s; }
-        .dot-2 { animation-delay: 0.3s; }
-        .dot-3 { animation-delay: 0.6s; }
-        .dot-4 { animation-delay: 0.9s; }
-        .dot-5 { animation-delay: 1.2s; }
-        @keyframes dotPulse { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
-
-        #progress-line {
-            position: absolute; top: -4px; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(to right, transparent, #ef4444, #3b82f6, #ef4444, transparent);
-            background-size: 200% 100%;
-            display: none;
-            animation: moveLine 1.2s linear infinite;
-        }
-        @keyframes moveLine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-        .input-container { display: flex; align-items: center; gap: 8px; max-width: 800px; margin: 0 auto; }
-        #user-input { flex: 1; background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 12px; padding: 10px; font-size: 16px; font-weight: 900; color: #1e293b; resize: none; min-height: 44px; max-height: 120px; }
-        .send-btn { background: #22c55e; color: white; width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
-        .modal-box { background: white; width: 92%; max-width: 400px; border-radius: 20px; border: 3px solid #3b82f6; padding: 20px; max-height: 85vh; display: flex; flex-direction: column; }
-        .modal-title { text-align: center; color: #3b82f6; font-weight: 900; margin-bottom: 15px; text-transform: uppercase; }
-        
-        .setting-row { margin-bottom: 12px; }
-        .ctrl-group { display: flex; border: 2px solid #3b82f6; border-radius: 10px; overflow: hidden; margin-top: 5px; }
-        .btn-ctrl { flex: 1; padding: 10px; border: none; background: white; font-weight: 900; cursor: pointer; }
-        .ctrl-val { flex: 2; display: flex; align-items: center; justify-content: center; background: #eff6ff; font-weight: 900; border-left: 2px solid #3b82f6; border-right: 2px solid #3b82f6; }
-        select { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #3b82f6; font-weight: 900; margin-top: 5px; }
-
-        .chat-list-scroll { flex: 1; overflow-y: auto; margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 10px; min-height: 300px; }
-        .history-item { padding: 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; user-select: none; }
-        .history-item.active { background: #eff6ff; border-left: 5px solid #3b82f6; }
-
-        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 5px; }
+        body { background: #121212; color: white; font-family: sans-serif; padding: 10px; }
+        .setup { background: #1e1e1e; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; }
+        input { width: calc(100% - 22px); padding: 10px; margin: 5px 0; background: #222; border: 1px solid #444; color: white; border-radius: 5px; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        #chat { height: 300px; overflow-y: auto; background: #1e1e1e; padding: 10px; border-radius: 10px; border: 1px solid #333; display: flex; flex-direction: column; gap: 8px; }
+        .msg { padding: 8px 12px; border-radius: 10px; max-width: 85%; font-size: 14px; }
+        .user { background: #007bff; align-self: flex-end; }
+        .bot { background: #333; align-self: flex-start; }
     </style>
 </head>
 <body>
 
-   <div class="top-banner">
-    <div class="header-left">
-        <div class="header-btn btn-gray" onclick="openSettings()">⚙️</div>
-        <div id="live-clock">00:00</div>
+    <div class="setup">
+        <input type="text" id="grokKey" placeholder="Grok API Key (gsk_...)">
+        <input type="text" id="tavilyKey" placeholder="Tavily API Key (tvly-...)">
+        <button onclick="saveKeys()">ANAHTARLARI YERELDE SAKLA</button>
     </div>
+
+    <div id="chat"></div>
     
-    <div class="header-right">
-        <div class="header-btn btn-red" onclick="askResetKhoj()">!</div>
-        
-        <div class="header-btn btn-green" onclick="askClearChat()">🧹</div>
-    </div>
-</div>
-
-    <div id="chat-screen"></div>
-
-    <div class="input-wrapper">
-        <div id="typing-status">Yazıyor <span class="dot-anim dot-1">.</span> <span class="dot-anim dot-2">.</span> <span class="dot-anim dot-3">.</span> <span class="dot-anim dot-4">.</span> <span class="dot-anim dot-5">.</span></div>
-        <div id="progress-line"></div>
-        <div class="input-container">
-            <textarea id="user-input" rows="1" placeholder="Gene mi sen? 🤬🤬🤬"></textarea>
-            <div class="send-btn" onclick="handleSend()">➤</div>
-        </div>
+    <div style="display:flex; margin-top:10px;">
+        <input type="text" id="userInput" placeholder="Mesaj yazın..." style="flex:1;">
+        <button onclick="send()" style="width:auto; margin-left:10px;">GÖNDER</button>
     </div>
 
-    <div id="settings-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 class="modal-title">AYARLAR</h3>
-            <div class="setting-row">
-                <label style="font-size:11px; font-weight:900">YAZI BOYUTU</label>
-                <div class="ctrl-group">
-                    <button class="btn-ctrl" onclick="adjustConfig('font', -1)">-</button>
-                    <div class="ctrl-val"><span id="font-val">16</span>PX</div>
-                    <button class="btn-ctrl" onclick="adjustConfig('font', 1)">+</button>
-                </div>
-            </div>
-            <div class="setting-row">
-                <label style="font-size:11px; font-weight:900">YAZI KALINLIĞI</label>
-                <div class="ctrl-group">
-                    <button class="btn-ctrl" onclick="adjustConfig('weight', -100)">-</button>
-                    <div class="ctrl-val"><span id="weight-val">900</span></div>
-                    <button class="btn-ctrl" onclick="adjustConfig('weight', 100)">+</button>
-                </div>
-            </div>
-            <div class="setting-row">
-                <label style="font-size:11px; font-weight:900">DAKTİLO HIZI (MS)</label>
-                <div class="ctrl-group">
-                    <button class="btn-ctrl" onclick="adjustConfig('speed', -5)">-</button>
-                    <div class="ctrl-val"><span id="speed-val">20</span></div>
-                    <button class="btn-ctrl" onclick="adjustConfig('speed', 5)">+</button>
-                </div>
-            </div>
-            <div class="setting-row">
-                <label style="font-size:11px; font-weight:900">YAZI EFEKTİ</label>
-                <select id="effect-select" onchange="adjustConfig('effect', this.value)">
-                    <option value="typewriter">DAKTİLO</option>
-                    <option value="fade">SOLARAK</option>
-                    <option value="slide">KAYARAK</option>
-                </select>
-            </div>
-            <button class="btn btn-blue" onclick="saveSettings()">KAYDET VE KAPAT</button>
-        </div>
-    </div>
-
-    <div id="history-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 class="modal-title">GEÇMİŞ</h3>
-            <div id="chat-list" class="chat-list-scroll"></div>
-            <button class="btn btn-blue" onclick="closeModals()">KAPAT</button>
-        </div>
-    </div>
-
-    <div id="edit-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 class="modal-title">DÜZENLE</h3>
-            <input type="text" id="edit-name-input" style="width:100%; padding:12px; border-radius:10px; border:2px solid #3b82f6; font-weight:900; margin-bottom:15px;">
-            <button class="btn btn-blue" onclick="saveChatEdit()">GÜNCELLE</button>
-            <button class="btn btn-red" onclick="deleteSingleChat()">SİL</button>
-            <button class="btn btn-gray" onclick="closeModals()">VAZGEÇ</button>
-        </div>
-    </div>
-
-    <div id="confirm-modal" class="modal-overlay">
-        <div class="modal-box" style="text-align:center">
-            <h3 class="modal-title">ONAY</h3>
-            <p id="confirm-text" style="font-weight:900"></p>
-            <div style="display:flex; gap:10px; margin-top:10px">
-                <button class="btn btn-red" id="confirm-yes">SİL</button>
-                <button class="btn btn-green" onclick="closeModals()">VAZGEÇ</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyBqlA4yrw0rJZQyR3t6daJKru28EkmWhe4", authDomain: "khoj-smart.firebaseapp.com", databaseURL: "https://khoj-smart-default-rtdb.firebaseio.com/", projectId: "khoj-smart", storageBucket: "khoj-smart.firebasestorage.app", messagingSenderId: "603123756358", appId: "1:603123756358:web:16ec68ba2872ae0436c947" };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const API_KEY = 'kk-ZeYLGGpxj0XScjEsTpgo4Aj2VjgJwtMJodqoyEsYtUI';
-        const API_URL = "https://white-heart-ea96.06mmt8129.workers.dev/";
+       const PROXY_URL = "https://autumn-dew-1884.06mmt8129.workers.dev/";
+let chatHistory = []; // Konuşma buraya birikecek
 
-        let chats = {}, activeChatId = null, selectedChatId = null, pressTimer, config = { speed: 20, font: 16, weight: 900, effect: 'typewriter' };
-
-        function updateClock() { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}); }
-        setInterval(updateClock, 1000); updateClock();
-
+        // Sayfa açıldığında anahtarları yükle
         window.onload = () => {
-            database.ref().once('value', (s) => {
-                const d = s.val();
-                if (d) { chats = d.khoj_chats || {}; config = d.khoj_config || config; applyConfig(); activeChatId = localStorage.getItem('active_id') || Object.keys(chats)[0]; if (activeChatId && chats[activeChatId]) loadActiveChat(); else createNewChat(); } else createNewChat();
-            });
+            document.getElementById('grokKey').value = localStorage.getItem('grok_key') || '';
+            document.getElementById('tavilyKey').value = localStorage.getItem('tavily_key') || '';
         };
 
-        function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
-        function openHistory() { renderChatList(); document.getElementById('history-modal').style.display = 'flex'; }
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
-
-        function askClearChat() { 
-            document.getElementById('confirm-text').innerText = "TÜM YAZIŞMALAR KALICI OLARAK TEMİZLENSİN Mİ?";
-            document.getElementById('confirm-yes').onclick = () => { clearActiveChat(); closeModals(); };
-            document.getElementById('confirm-modal').style.display = 'flex';
+        function saveKeys() {
+            localStorage.setItem('grok_key', document.getElementById('grokKey').value);
+            localStorage.setItem('tavily_key', document.getElementById('tavilyKey').value);
+            alert("ABİ Anahtarlar kaydedildi!");
         }
 
-        function clearActiveChat() {
-            if(activeChatId) {
-                chats[activeChatId].messages = [];
-                saveAll(); loadActiveChat();
-            }
+        function addMsg(s, t) {
+            const d = document.createElement('div');
+            d.className = `msg ${s}`; d.innerText = t;
+            const c = document.getElementById('chat');
+            c.appendChild(d); c.scrollTop = c.scrollHeight;
         }
 
-        function createNewChat() {
-            const id = 'chat_' + Date.now();
-            chats[id] = { title: "YENİ SOHBET", messages: [], date: new Date().toLocaleString('tr-TR') };
-            activeChatId = id; saveAll(); loadActiveChat();
-        }
+  async function send() {
+    const input = document.getElementById('userInput');
+    const msg = input.value.trim();
+    if (!msg) return;
 
-        function renderChatList() {
-            const list = document.getElementById('chat-list'); list.innerHTML = '';
-            Object.keys(chats).sort((a,b) => b.split('_')[1] - a.split('_')[1]).forEach(id => {
-                const item = document.createElement('div');
-                item.className = `history-item ${id === activeChatId ? 'active' : ''}`;
-                item.innerHTML = `<div style="font-weight:900;">${chats[id].title}</div><div style="font-size:10px;">${chats[id].date}</div>`;
-                item.ontouchstart = () => { pressTimer = setTimeout(() => openEditModal(id), 1500); };
-                item.ontouchend = () => clearTimeout(pressTimer);
-                item.onmousedown = () => { pressTimer = setTimeout(() => openEditModal(id), 1500); };
-                item.onmouseup = () => clearTimeout(pressTimer);
-                item.onclick = () => { activeChatId = id; loadActiveChat(); saveAll(); closeModals(); };
-                list.appendChild(item);
-            });
-        }
+    addMsg('user', msg);
+    input.value = '';
+    addMsg('bot', 'Düşünüyorum...');
+    const botMsgDiv = document.getElementById('chat').lastElementChild;
 
-        function openEditModal(id) { selectedChatId = id; document.getElementById('edit-name-input').value = chats[id].title; document.getElementById('edit-modal').style.display = 'flex'; }
-        function saveChatEdit() { chats[selectedChatId].title = document.getElementById('edit-name-input').value.toUpperCase(); saveAll(); renderChatList(); closeModals(); }
-        function deleteSingleChat() { delete chats[selectedChatId]; if(activeChatId === selectedChatId) activeChatId = Object.keys(chats)[0]; saveAll(); location.reload(); }
-
-        function loadActiveChat() {
-            const s = document.getElementById('chat-screen'); s.innerHTML = '';
-            (chats[activeChatId].messages || []).forEach(m => displayMessage(m.text, m.type, false));
-            s.scrollTop = s.scrollHeight;
-        }
-
-        async function handleSend() {
-            const i = document.getElementById('user-input'), t = i.value.trim();
-            if(!t || !activeChatId) return;
-            i.value = ''; displayMessage(t, 'user-message', true);
-            chats[activeChatId].messages.push({text: t, type:'user-message'});
-            if(chats[activeChatId].title === "YENİ SOHBET") chats[activeChatId].title = t.substring(0,20).toUpperCase();
-
-            document.getElementById('progress-line').style.display = 'block';
-            document.getElementById('typing-status').style.display = 'block';
-
-            try {
-                const r = await fetch(API_URL, { method: 'POST', headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ q: t, stream: false }) });
-                const d = await r.json();
-                document.getElementById('progress-line').style.display = 'none';
-                document.getElementById('typing-status').style.display = 'none';
-                if(d.response) {
-                    let cleaned = d.response.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/(?:https?|ftp):\/\/[\n\S]+/g, '').replace(/^\s*\*\s+/gm, '🔹 ').replace(/\*\*(.*?)\*\*/g, '<span style="color:#ef4444;">$1</span>').trim();
-                    chats[activeChatId].messages.push({text: cleaned, type:'khoj-message'});
-                    displayMessage(cleaned, 'khoj-message', true); saveAll();
-                }
-            } catch(e) { 
-                document.getElementById('progress-line').style.display = 'none';
-                document.getElementById('typing-status').style.display = 'none';
-            }
-        }
-
-        function displayMessage(t, type, anim) {
-            const s = document.getElementById('chat-screen'), d = document.createElement('div');
-            d.className = `message ${type}`; s.appendChild(d);
-            if(anim) {
-                if(config.effect === 'typewriter' && type === 'khoj-message') {
-                    let idx = 0; d.innerHTML = "";
-                    function tw() { if(idx < t.length) { 
-                        if(t.substr(idx, 13) === '<span style="') {
-                            let end = t.indexOf('</span>', idx) + 7;
-                            d.innerHTML += t.substring(idx, end); idx = end;
-                        } else { d.innerHTML += t.charAt(idx++); }
-                        s.scrollTop = s.scrollHeight; setTimeout(tw, config.speed); 
-                    } } tw();
-                } else {
-                    d.innerHTML = t;
-                    d.classList.add(config.effect === 'fade' ? 'effect-fade' : (config.effect === 'slide' ? 'effect-slide' : ''));
-                    s.scrollTop = s.scrollHeight;
-                }
-            } else { d.innerHTML = t; s.scrollTop = s.scrollHeight; }
-        }
-
-        function adjustConfig(type, val) {
-            if(type === 'font') config.font = Math.max(12, config.font + val);
-            if(type === 'weight') config.weight = Math.min(900, Math.max(100, config.weight + val));
-            if(type === 'speed') config.speed = Math.max(0, config.speed + val);
-            if(type === 'effect') config.effect = val;
-            applyConfig();
-        }
-
-        function applyConfig() {
-            document.getElementById('font-val').innerText = config.font;
-            document.getElementById('weight-val').innerText = config.weight;
-            document.getElementById('speed-val').innerText = config.speed;
-            document.documentElement.style.setProperty('--font-size', config.font + 'px');
-            document.documentElement.style.setProperty('--font-weight', config.weight);
-        }
-
-        function saveSettings() { saveAll(); closeModals(); }
-        function saveAll() { database.ref('khoj_chats').set(chats); database.ref('khoj_config').set(config); localStorage.setItem('active_id', activeChatId); }
- function askResetKhoj() {
-    document.getElementById('confirm-text').innerText = "GEÇMİŞ UNUTULACAK, ONAYLIYOR MUSUNUZ?";
-    document.getElementById('confirm-yes').onclick = () => { startKhojReset(); };
-    document.getElementById('confirm-modal').style.display = 'flex';
-}
-
-async function startKhojReset() {
-    closeModals();
-    document.getElementById('reset-modal').style.display = 'flex';
-    document.getElementById('reset-done-btn').style.display = 'none';
-    document.getElementById('reset-status').style.display = 'block';
-    document.getElementById('reset-title').innerText = "SIFIRLANIYOR";
     try {
-        const msg = "şimdiye kadar olan konuşmalarımızı unut, bundan sonraki konuşmalarımız da asla geçmiş konulardan bahsetme!";
-        await fetch(API_URL, { 
-            method: 'POST', 
-            headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ q: msg, stream: false }) 
-        });
-        document.getElementById('reset-status').style.display = 'none';
-        document.getElementById('reset-title').innerText = "BAŞARILI";
-        document.getElementById('reset-done-btn').style.display = 'block';
-    } catch(e) { closeModals(); alert("Hata oluştu!"); }
-}
+        // Hafızayı da içeren mesaj listesi
+        let messagesForIntent = [
+            ...chatHistory.slice(-4), 
+            { role: "user", content: `Son soru için internet araması lazım mı? Sadece SEARCH veya CHAT yaz: ${msg}` }
+        ];
 
-function completeReset() { 
-    clearActiveChat(); // Bu senin mevcut temizleme fonksiyonun, ekranı ve firebase'i siler.
-    closeModals(); 
+        // Arama kararı
+        const intentRes = await fetch(`${PROXY_URL}/?url=https://api.groq.com/openai/v1/chat/completions`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('grok_key')}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: messagesForIntent })
+        });
+        const intentData = await intentRes.json();
+        
+        let context = "";
+        if (intentData.choices[0].message.content.includes("SEARCH")) {
+            // Arama terimini hafızayla birleştiriyoruz
+            const searchQuery = chatHistory.length > 0 ? chatHistory[chatHistory.length-2].content + " " + msg : msg;
+            const sRes = await fetch(`${PROXY_URL}/?url=https://api.tavily.com/search`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ api_key: localStorage.getItem('tavily_key'), query: searchQuery, search_depth: "advanced" })
+            });
+            const sData = await sRes.json();
+            context = "\nBilgi: " + sData.results.map(r => r.content).join(" ");
+        }
+
+        // Final Cevabı
+        const finalMessages = [
+            { role: "system", content: "Sen Galatasaraylı, samimi bir asistansın. Her cevaba ABİ diyerek başla. 🔹 kullan. Kısa ol." },
+            ...chatHistory.slice(-6),
+            { role: "user", content: context + "\n\nSoru: " + msg }
+        ];
+
+        const chatRes = await fetch(`${PROXY_URL}/?url=https://api.groq.com/openai/v1/chat/completions`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('grok_key')}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: finalMessages })
+        });
+        const chatData = await chatRes.json();
+        const reply = chatData.choices[0].message.content;
+
+        // Hafızaya ekle
+        chatHistory.push({ role: "user", content: msg });
+        chatHistory.push({ role: "assistant", content: reply });
+
+        botMsgDiv.innerText = reply;
+    } catch (e) {
+        botMsgDiv.innerText = "ABİ hata oldu!";
+    }
 }
- </script>
-	<div id="reset-modal" class="modal-overlay">
-    <div class="modal-box" style="text-align:center">
-        <h3 class="modal-title" id="reset-title">SIFIRLANIYOR</h3>
-        <p id="reset-status" style="font-weight:900">Sıfırlanıyor<span class="dot-anim dot-1">.</span><span class="dot-anim dot-2">.</span><span class="dot-anim dot-3">.</span></p>
-        <button class="btn btn-blue" id="reset-done-btn" style="display:none;" onclick="completeReset()">TAMAM</button>
-    </div>
-</div>
+    </script>
 </body>
 </html>
